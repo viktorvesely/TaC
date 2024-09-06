@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "tac"
+version = "0.1.0"
+description = ""
+authors = ["SebastianJitaru <sjitaru29@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+numpy = "^2.1.1"
+pillow = "^10.4.0"
+pygame = "^2.6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
