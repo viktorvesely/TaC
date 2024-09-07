@@ -1,30 +1,30 @@
+from pygame import Surface
+import pygame
+from .agent_interface import AgentInterface
+
 import numpy as np
 
-from .entity import Entity
-from ..animations.animation import Animation
 
+class Agent(AgentInterface):
 
-class Agent(Entity):
-
-
-    def __init__(self, position: np.ndarray) -> None:
-        self.position: np.ndarray = position
-        self.animations: list[Animation] = [] 
-
-
-    def animate(self):
+    def __init__(self, position: np.ndarray, color: np.ndarray):
+        super().__init__(position)
         
-        # Iterate backwards for safe removal
-        for i in range(len(self.animations) - 1, -1, -1):
-            animation = self.animations[i]
+        self.color = color
+        self.max_speed = 0.1
 
-            # Progress the animation
-            _, continue_animating = next(animation)
 
-            if not continue_animating:
-               self.animations.pop(i) 
 
+    def tick(self):
+        """
+        Moves the agent in the environment in a random direction.
+        """
+        super().tick()
+
+        angle = np.random.random() * 2 * np.pi
+        self.velocity = np.array([np.cos(angle), np.sin(angle)]) * self.max_speed
         
-                
+        
 
-
+    def draw(self, surface: Surface):
+        pygame.draw.circle(surface, self.color, self.position, 10)

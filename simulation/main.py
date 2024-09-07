@@ -4,47 +4,45 @@ import numpy as np
 from .window import Window
 from .state import State
 
+from .world.world import World
+from .entities.agent import Agent
+from .utils import toMs
+
 state = State()
-
-def tick():
-
-    for entity in state.entities:
-        entity.tick()
     
-
 def realtime_simulation():
 
     window = Window()
+    world = World(window)
+
+    world.add_agent(Agent(window.window_size * np.random.random(), np.array([125, 125, 125])))
+
     state.window = window
-    
+    state.world = world
+
     state.last_draw = now()
     state.last_tick = now()
-
-    from .entities.test import TestAgent
-    state.entities.append(TestAgent(np.random.random(2) * state.window.window_size))
 
     with window:
 
         while window.running:
             
             state.t = now()
-            state.dDraw = state.t - state.last_draw
-            window.draw()
+            state.dDraw = toMs(state.t - state.last_draw)
+            world.draw(window.surface)
             t_draw = now()
             state.last_draw = t_draw
             
             
             if (t_draw - state.last_tick) >= state.dTick_target:
-                state.dTick = now() - state.last_tick
-                tick()
+                state.dTick = toMs(now() - state.last_tick)
+                world.tick()
                 state.last_tick = now()
                 
 
             sleep(0.002)
 
-            
-
-            
+    
 
 
 

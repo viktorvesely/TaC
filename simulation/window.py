@@ -43,17 +43,6 @@ class Window:
             if event.type == pygame.QUIT:
                 self.running = False
 
-    def draw(self):
-
-        self.pygame_event_handler()
-
-        self.surface.fill((0, 0, 0))
-
-        for entity in state.entities:
-            entity.draw(self.surface)
-        
-        pygame.display.update()
-
 
 
 

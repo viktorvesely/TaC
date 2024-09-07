@@ -2,8 +2,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .events.event import Event
-    from .entities.entity import Entity
     from .window import Window
+    from .world import world
 
 from .utils import ms
 
@@ -14,15 +14,13 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
-
 class State(metaclass=Singleton):
 
     def __init__(self) -> None:
         
-        self.entities: list[Entity] = []
+        self.world: world 
         self.events: list[Event] = []
         self.window: Window | None = None
-
 
         self.t: int = 0
         self.last_draw: int = 0

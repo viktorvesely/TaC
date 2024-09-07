@@ -6,6 +6,9 @@ def ms(t_ms: float) -> int:
 def s(t_s: float) -> int:
     return int(t_s * (10 ** 9))
 
+def toMs(ns: int) -> float:
+    return ns / (10 ** 6)
+
 class Utils:
 
     @staticmethod 
