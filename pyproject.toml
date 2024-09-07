@@ -10,6 +10,7 @@ python = "^3.12"
 numpy = "^2.1.1"
 pillow = "^10.4.0"
 pygame = "^2.6.0"
+mesa = "^2.3.4"
 
 
 [build-system]
