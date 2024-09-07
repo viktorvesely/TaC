@@ -1,6 +1,3 @@
-Here's an updated README with the description and image included:
-
-```markdown
 # TaC
 **Thieves and Citizens**
 
@@ -8,7 +5,7 @@ Here's an updated README with the description and image included:
 
 ## Description
 
-TaC is a strategic game simulation where two groups, Thieves and Citizens, interact within a defined environment. The objective is to study and observe the behavior patterns of these groups as they compete for resources and survival. The simulation showcases complex behaviors through different strategies and interactions between the two groups.
+TaC is a strategic game simulation where two groups, Thieves and Citizens, interact within a  environment.
 
 ## Poetry Setup Instructions
 
@@ -63,5 +60,3 @@ If you need to update the dependencies:
 ```bash
 poetry update
 ```
-
-This README now includes the project description, the image, and the setup instructions for Poetry. You can adjust the `<repository-url>` and `<main-script>.py` as needed for your specific project.
