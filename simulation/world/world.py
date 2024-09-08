@@ -39,10 +39,38 @@ class World(WorldInterface):
         pygame.display.flip()
 
     def tick(self):
-
+        # After each tick Check for collisions and update agent positions
         for agent in self.agents:
             agent.tick()
-            
+        handle_collisions()
+        
+    def handle_collisions(self):
+        #Cases to handle:
+        # - Agent collides with wall
+        # - Agent collides with another agent
+            # - Thief and Citizen collides
+            # - Thief and Thief collides
+            # - Citizen and Citizen collides
+        pass
+    
+    def check_collision(self, agent1: Agent, agent2: Agent):
+        pass
+    
+    def resolve_collision(self, agent1: Agent, agent2: Agent):
+        pass
+    
+    def handle_thief_citizen_collision(self, thief: Thief, citizen: Citizen):
+        # Call behavior when a thief collides with a citizen
+        pass
+
+    def handle_thief_thief_collision(self, thief1: Thief, thief2: Thief):
+        # Call specific behavior when thieves collide
+        pass
+
+    def handle_citizen_citizen_collision(self, citizen1: Citizen, citizen2: Citizen):
+        # Call specific behavior when citizens collide
+        pass
+                    
     def populate_world(self, n_agents: int):
         n_thiefs = int(n_agents * 0.3)
         n_citizens = n_agents - n_thiefs
