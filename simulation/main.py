@@ -6,6 +6,8 @@ from .state import State
 
 from .world.world import World
 from .entities.agent import Agent
+from .entities.citizen import Citizen
+from .entities.thief import Thief
 from .utils import toMs
 
 state = State()
@@ -15,8 +17,8 @@ def realtime_simulation():
     window = Window()
     world = World(window)
 
-    world.add_agent(Agent(window.window_size * np.random.random(), np.array([125, 125, 125])))
-
+    world.populate_world(100)
+    
     state.window = window
     state.world = world
 
