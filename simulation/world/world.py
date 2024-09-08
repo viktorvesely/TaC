@@ -1,9 +1,9 @@
 from pygame import Surface
 import pygame
 
-from ..entities.agent import Agent
-from ..entities.citizen import Citizen  
-from ..entities.thief import Thief
+from ..entities.agents.agent import Agent
+from ..entities.agents.citizen import Citizen  
+from ..entities.agents.thief import Thief
 from ..window import Window
 
 from .world_interface import WorldInterface

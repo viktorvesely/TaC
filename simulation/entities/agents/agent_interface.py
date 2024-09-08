@@ -1,8 +1,8 @@
 import numpy as np
 from numpy import ndarray
 
-from ..state import State
-from .entity import Entity
+from simulation.state import State
+from ..entity import Entity
 
 state = State()
 

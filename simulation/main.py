@@ -5,9 +5,6 @@ from .window import Window
 from .state import State
 
 from .world.world import World
-from .entities.agent import Agent
-from .entities.citizen import Citizen
-from .entities.thief import Thief
 from .utils import toMs
 
 state = State()
