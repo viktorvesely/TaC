@@ -31,7 +31,6 @@ class Window:
             traceback: object | None
         ):
 
-
         self.running = False
         self.surface = None
 

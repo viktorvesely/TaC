@@ -4,6 +4,7 @@ if TYPE_CHECKING:
     from .events.event import Event
     from .window import Window
     from .world import world
+    from .camera import Camera
 
 from .utils import ms
 
@@ -31,3 +32,5 @@ class State(metaclass=Singleton):
         self.dDraw: int = 0
 
         self.timescale: float = 1
+
+        self.camera: Camera = None

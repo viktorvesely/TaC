@@ -3,6 +3,9 @@ import pygame
 from .agent_interface import AgentInterface
 
 import numpy as np
+from ...state import State
+
+state = State()
 
 
 class Agent(AgentInterface):
@@ -27,4 +30,4 @@ class Agent(AgentInterface):
         
 
     def draw(self, surface: Surface):
-        pygame.draw.circle(surface, self.color, self.position, 10)
+        pygame.draw.circle(surface, self.color, state.camera.worldToScreen @ self.position, 10 * state.camera.zoom)

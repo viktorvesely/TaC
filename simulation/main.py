@@ -3,9 +3,9 @@ import numpy as np
 
 from .window import Window
 from .state import State
-
 from .world.world import World
 from .utils import toMs
+from .camera import Camera
 
 state = State()
     
@@ -15,7 +15,9 @@ def realtime_simulation():
     world = World(window)
 
     world.populate_world(100)
-    
+    camera = Camera(window.window_size, np.zeros(2))
+
+    state.camera = camera
     state.window = window
     state.world = world
 
@@ -36,6 +38,7 @@ def realtime_simulation():
             if (t_draw - state.last_tick) >= state.dTick_target:
                 state.dTick = toMs(now() - state.last_tick)
                 world.tick()
+                camera.tick()
                 state.last_tick = now()
                 
 
