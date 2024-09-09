@@ -14,7 +14,7 @@ def realtime_simulation():
     window = Window()
     state.window = window
 
-    camera = Camera(window.window_size, window.window_size / 2)
+    camera = Camera(window.window_size, np.zeros(2))
     state.camera = camera
 
     world = World(window)

@@ -72,19 +72,23 @@ class Camera:
         translate = np.zeros(2)
         should_update = False
         zoomBy = 1
+        speed_boost = 1
 
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_a]:
             should_update = True
             translate += np.array([-1, 0])
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_d]:
             should_update = True
             translate += np.array([1, 0])
-        if keys[pygame.K_UP]:
+        if keys[pygame.K_w]:
             should_update = True
             translate += np.array([0, -1])
-        if keys[pygame.K_DOWN]:
+        if keys[pygame.K_s]:
             should_update = True
             translate += np.array([0, 1])
+
+        if keys[pygame.K_LSHIFT]:
+            speed_boost = 2
 
         if keys[pygame.K_o]:
             should_update = True
@@ -99,7 +103,7 @@ class Camera:
 
             if mag != 0:
                 translate = translate / mag
-                translate = translate * self.camera_speed / self.zoom
+                translate = translate * self.camera_speed * speed_boost / self.zoom
             
             self.moveBy(translate, _update=False)
             self.zoomBy(zoomBy)

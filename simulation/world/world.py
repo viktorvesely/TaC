@@ -86,6 +86,6 @@ class World(WorldInterface):
         
         for agent_type, n, color in agent_data:
             for _ in range(n):
-                position =  self.window.window_size * np.random.rand(2)
+                position =  self.window.window_size * np.random.rand(2) - self.window.window_size / 2
                 agent = agent_type(position, color)
                 self.add_agent(agent)

@@ -1,5 +1,6 @@
 import numpy as np
 from pygame import Surface, draw
+import pygame
 
 from ..state import State
 
@@ -13,8 +14,7 @@ class Grid:
         self.world_size = np.array([-size, size]) * grid_size
 
     
-    def draw(self, surface: Surface):
-
+    def draw_grid(self, surface: Surface):
         camera = state.camera
         w_min, w_max = self.world_size
 
@@ -45,3 +45,9 @@ class Grid:
             draw.line(surface, (255, 255, 255), screen_start, screen_end)
             y += self.size
 
+    def draw(self, surface: Surface):
+
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_l]:
+            self.draw_grid(surface)
