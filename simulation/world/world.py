@@ -42,7 +42,6 @@ class World(WorldInterface):
         # After each tick Check for collisions and update agent positions
         for agent in self.agents:
             agent.tick()
-        handle_collisions()
         
     def handle_collisions(self):
         #Cases to handle:
