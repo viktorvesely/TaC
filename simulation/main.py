@@ -12,14 +12,14 @@ state = State()
 def realtime_simulation():
 
     window = Window()
-    world = World(window)
-
-    world.populate_world(100)
-    camera = Camera(window.window_size, np.zeros(2))
-
-    state.camera = camera
     state.window = window
+
+    camera = Camera(window.window_size, window.window_size / 2)
+    state.camera = camera
+
+    world = World(window)
     state.world = world
+    world.populate_world(100)
 
     state.last_draw = now()
     state.last_tick = now()
@@ -33,7 +33,6 @@ def realtime_simulation():
             world.draw(window.surface)
             t_draw = now()
             state.last_draw = t_draw
-            
             
             if (t_draw - state.last_tick) >= state.dTick_target:
                 state.dTick = toMs(now() - state.last_tick)

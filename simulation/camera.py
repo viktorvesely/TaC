@@ -14,8 +14,10 @@ class CameraMatrix:
 
 class Camera:
 
-    camera_speed: float = 5
+    camera_speed: float = 10
     zoom_speed_factor: float = 1.05 
+    min_zoom: float = 0.11
+    max_zoom: float = 5.0
 
     def __init__(self, window_size: np.ndarray, positon: np.ndarray, zoom: float = 1.0) -> None:
         
@@ -50,13 +52,18 @@ class Camera:
         self.screenToWorld = CameraMatrix(np.linalg.inv(self.worldToScreen.m))
 
 
-    def moveBy(self, by: np.ndarray):
+    def moveBy(self, by: np.ndarray, _update: bool=True):
         self.position = self.position + by
-        self.update()
+        
+        if _update:
+            self.update()
 
-    def zoomBy(self, by: float):
+    def zoomBy(self, by: float, _update: bool=True):
         self.zoom *= by
-        self.update()
+        self.zoom = max(self.min_zoom, min(self.max_zoom, self.zoom))
+
+        if _update:
+            self.update()
 
     def tick(self):
         
@@ -94,7 +101,7 @@ class Camera:
                 translate = translate / mag
                 translate = translate * self.camera_speed / self.zoom
             
-            self.moveBy(translate)
+            self.moveBy(translate, _update=False)
             self.zoomBy(zoomBy)
             
 

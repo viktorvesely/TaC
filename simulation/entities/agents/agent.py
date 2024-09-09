@@ -17,7 +17,6 @@ class Agent(AgentInterface):
         self.max_speed = 0.1
 
 
-
     def tick(self):
         """
         Moves the agent in the environment in a random direction.
@@ -26,7 +25,6 @@ class Agent(AgentInterface):
 
         angle = np.random.random() * 2 * np.pi
         self.velocity = np.array([np.cos(angle), np.sin(angle)]) * self.max_speed
-        
         
 
     def draw(self, surface: Surface):

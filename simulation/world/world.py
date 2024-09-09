@@ -7,6 +7,7 @@ from ..entities.agents.thief import Thief
 from ..window import Window
 
 from .world_interface import WorldInterface
+from .grid import Grid
 
 import numpy as np
 
@@ -15,6 +16,8 @@ class World(WorldInterface):
     def __init__(self, window: Window):
         self.agents: list[Agent] = []
         self.window = window
+
+        self.grid: Grid = Grid()
         
     
     def add_agent(self, agent: Agent):
@@ -35,6 +38,8 @@ class World(WorldInterface):
 
         for agent in self.agents:
             agent.draw(surface)
+
+        self.grid.draw(surface)
 
         pygame.display.flip()
 
