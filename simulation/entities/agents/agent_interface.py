@@ -16,7 +16,6 @@ class AgentInterface(Entity):
 
     def tick(self):
 
-        next_pos = self.position + self.velocity * state.dTick
-        self.position = next_pos
-
+        self.position = self.position + self.velocity * state.dTick
+        
         return super().tick()

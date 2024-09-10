@@ -19,7 +19,7 @@ class State(metaclass=Singleton):
 
     def __init__(self) -> None:
         
-        self.world: world 
+        self.world: world = None
         self.events: list[Event] = []
         self.window: Window | None = None
 
@@ -36,3 +36,4 @@ class State(metaclass=Singleton):
         self.camera: Camera = None
 
         self.keys_pressed: set = set()
+

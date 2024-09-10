@@ -3,6 +3,7 @@ from pygame import Surface, draw, Rect
 import pygame
 
 from ..entities.entity import Entity
+from ..entities.agents.agent import Agent
 from ..state import State
 
 state = State()
@@ -136,10 +137,10 @@ class Grid:
         for i, ent in enumerate(ents):
             ent.position = positions[i, :]
 
-    def handle_wall_collision(self, collider_entities: list[Entity]):
+    def handle_wall_collision(self, collider_entities: Agent):
 
 
-        ent_pos = self.extract_ent_pos(collider_entities)
+        ent_pos = collider_entities.position # self.extract_ent_pos(collider_entities)
         n_ents = ent_pos.shape[0]
 
         # Collision with map bound
@@ -182,9 +183,9 @@ class Grid:
         # Resolve the collision using the collision point
         ent_pos[collide_mask] = collision_closest_points
 
-        self.inject_ent_pos(collider_entities, ent_pos)
+        collider_entities.position = ent_pos  #self.inject_ent_pos(collider_entities, ent_pos)
 
-    def tick(self, collider_entities: list[Entity]):
+    def tick(self, collider_entities: Agent):
 
 
         self.handle_wall_collision(collider_entities)
