@@ -1,7 +1,7 @@
 # TaC
 **Thieves and Citizens**
 
-![behaviour](https://github.com/viktorvesely/TaC/blob/main/tac.png?raw=True)
+![behaviour](https://github.com/viktorvesely/TaC/blob/main/tac_flow_chart_v1.2.png?raw=True)
 
 ## Description
 
