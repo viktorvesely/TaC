@@ -32,8 +32,6 @@ class World(WorldInterface):
     
     def draw(self, surface: Surface):
 
-        self.window.pygame_event_handler()
-
         surface.fill((0, 0, 0))
 
         for agent in self.agents:
@@ -47,6 +45,8 @@ class World(WorldInterface):
         # After each tick Check for collisions and update agent positions
         for agent in self.agents:
             agent.tick()
+
+        self.grid.tick(self.agents)
         
     def handle_collisions(self):
         #Cases to handle:

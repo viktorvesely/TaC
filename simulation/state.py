@@ -34,3 +34,5 @@ class State(metaclass=Singleton):
         self.timescale: float = 1
 
         self.camera: Camera = None
+
+        self.keys_pressed: set = set()

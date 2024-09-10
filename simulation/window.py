@@ -8,7 +8,7 @@ state = State()
 
 class Window:
 
-    window_size: np.ndarray = np.array([1000, 800])
+    window_size: np.ndarray = np.array([1000, 600])
 
     def __init__(self):
 
@@ -38,10 +38,14 @@ class Window:
     
     def pygame_event_handler(self):
 
+        state.keys_pressed.clear()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
 
+            if event.type == pygame.KEYDOWN:
+                state.keys_pressed.add(event.key)
 
 
 

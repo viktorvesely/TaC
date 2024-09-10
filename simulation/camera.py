@@ -14,8 +14,8 @@ class CameraMatrix:
 
 class Camera:
 
-    camera_speed: float = 10
-    zoom_speed_factor: float = 1.05 
+    camera_speed: float = 2
+    zoom_speed_factor: float = 1.016 
     min_zoom: float = 0.11
     max_zoom: float = 5.0
 
@@ -90,10 +90,10 @@ class Camera:
         if keys[pygame.K_LSHIFT]:
             speed_boost = 2
 
-        if keys[pygame.K_o]:
+        if keys[pygame.K_i]:
             should_update = True
             zoomBy = self.zoom_speed_factor
-        if keys[pygame.K_p]:
+        if keys[pygame.K_o]:
             should_update = True
             zoomBy = 1 / self.zoom_speed_factor
 
