@@ -5,7 +5,7 @@ import pygame
 from .window import Window
 from .state import State
 from .world.world import World
-from .utils import toMs
+from .utils import ms, s, toMs
 from .camera import Camera
 
 state = State()
@@ -30,7 +30,7 @@ def realtime_simulation():
     with window:
 
         while window.running:
-            
+
             window.pygame_event_handler()
 
             if pygame.K_p in state.keys_pressed:
@@ -70,6 +70,7 @@ def realtime_simulation_cycle(window: Window, camera: Camera, world: World):
     if not ((now() - state.last_tick) >= state.dTick_target):
         return
     
+
     state.t = now()
     state.dDraw = toMs(state.t - state.last_draw)
     world.draw(window.surface)
@@ -87,3 +88,20 @@ def realtime_simulation_cycle(window: Window, camera: Camera, world: World):
 if __name__ == "__main__":
 
     realtime_simulation()
+
+
+    if False:
+        import pstats, cProfile
+
+        # Use the with statement to profile the function and save the results to a file
+        with cProfile.Profile() as profiler:
+            realtime_simulation()
+
+        # Create a Stats object from the saved profile results
+        stats = pstats.Stats(profiler)
+
+        # Sort the statistics by cumulative time and print them
+        stats.sort_stats('cumulative')
+        stats.dump_stats(filename="profile.prof")
+
+    
