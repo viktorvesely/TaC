@@ -14,7 +14,7 @@ import numpy as np
 
 class World(WorldInterface):
     def __init__(self, window: Window):
-        self.agents: list[Agent] = []
+        self.agents = Agent(50_000)
         self.window = window
 
         self.grid: Grid = Grid()
@@ -34,18 +34,14 @@ class World(WorldInterface):
 
         surface.fill((0, 0, 0))
 
-        for agent in self.agents:
-            agent.draw(surface)
-
+        self.agents.draw(surface)
         self.grid.draw(surface)
 
         pygame.display.flip()
 
     def tick(self):
         # After each tick Check for collisions and update agent positions
-        for agent in self.agents:
-            agent.tick()
-
+        self.agents.tick()
         self.grid.tick(self.agents)
         
     def handle_collisions(self):

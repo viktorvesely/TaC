@@ -22,7 +22,6 @@ def realtime_simulation():
 
     world = World(window)
     state.world = world
-    world.populate_world(100)
 
     state.last_draw = now()
     state.last_tick = now()
