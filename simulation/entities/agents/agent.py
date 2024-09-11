@@ -1,11 +1,12 @@
 from pygame import Surface
 import pygame
 from .agent_interface import AgentInterface
-
+from .btree.btState import BTState
 import numpy as np
 from ...state import State
 
 state = State()
+btState = BTState()
 
 
 class Agent(AgentInterface):
@@ -23,11 +24,16 @@ class Agent(AgentInterface):
         """
         Moves the agent in the environment in a random direction.
         """
-        super().tick()
+        try:
+            super().tick()
 
-        self._angle += (0.0001 * state.dTick) % (np.pi * 2)
-        self.velocity = np.array([np.cos(self._angle), np.sin(self._angle)]) * self.max_speed
-        
+            self._angle += (0.0001 * state.dTick) % (np.pi * 2)
+            self.velocity = np.array([np.cos(self._angle), np.sin(self._angle)]) * self.max_speed
+            return btState.SUCCESS
+        except Exception as e:
+            print(e)
+            return btState.FAILURE
+            
 
     def draw(self, surface: Surface):
         pygame.draw.circle(surface, self.color, state.camera.worldToScreen @ self.position, 10 * state.camera.zoom)
