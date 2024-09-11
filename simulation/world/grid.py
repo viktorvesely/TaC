@@ -1,10 +1,10 @@
+import arcade
+import arcade.color
 import numpy as np
-from pygame import Surface, draw, Rect
-import pygame
 
 from ..entities.entity import Entity
-from ..entities.agents.agent import Agent
 from ..state import State
+from ..utils import Utils
 
 state = State()
 
@@ -16,18 +16,29 @@ class Grid:
     def __init__(self, size: float = 40, grid_size: int = 40) -> None:
         
         self.size = size
+        self._tomid: np.ndarray = np.ones(2) * (self.size / 2)
         self.world_size = np.array([-size, size]) * grid_size
         self.world_TL = np.array([-size, -size]) * grid_size
         self.ngrids = grid_size * 2
 
-        self.walls = np.random.choice([1.0, 0.0], p=[0.1, 0.9], size=(self.ngrids, self.ngrids))
+        self.walls = np.random.choice([1.0, 0.0], p=[0.2, 0.8], size=(self.ngrids, self.ngrids))
+        # self.walls = np.zeros((self.ngrids, self.ngrids))
+        # self.walls[0, :] = 1.0
+
+        wall_mask = ~np.isclose(self.walls, 0)
+        wall_inds = np.array(np.where(wall_mask)).T
+        wall_positions = self.vectorized_cell_to_world(wall_inds, placement=WPOS_MIDDLE)
+        self.wall_mesh: np.ndarray = Utils.create_proojected_rect_mesh_array(
+            centers=wall_positions,
+            positive_offset_size=np.array([self.size, self.size]) / 2
+        )
 
         self._indicies = np.empty((self.ngrids, self.ngrids), dtype=object)    
         for i in range(self.ngrids):
             for j in range(self.ngrids):
                 self._indicies[i, j] = (j, i)
 
-        self._tomid: np.ndarray = np.ones(2) * (self.size / 2)
+        
     
 
     def world_pos_to_cell_pos(self, pos: np.ndarray) -> tuple[int, int]:
@@ -57,7 +68,7 @@ class Grid:
         
         return out
 
-    def draw_grid(self, surface: Surface):
+    def draw_grid(self, surface):
         camera = state.camera
         w_min, w_max = self.world_size
 
@@ -88,43 +99,55 @@ class Grid:
             draw.line(surface, (255, 255, 255), screen_start, screen_end)
             y += self.size
 
-    def draw_walls(self, surface: Surface):
+    def draw_walls(self):
         
         camera = state.camera
-        top_left = camera.screenToWorld @ np.zeros(2)
-        bottom_right = camera.screenToWorld @ state.window.window_size
 
-        left, top = self.world_pos_to_cell_pos(top_left)
-        right, bottom = self.world_pos_to_cell_pos(bottom_right)
+        # wall_mask = ~np.isclose(self.walls, 0)
+        # wall_inds = np.array(np.where(wall_mask)).T
+        # wall_positions = self.vectorized_cell_to_world(wall_inds, placement=WPOS_MIDDLE)
+        # wall_mesh: np.ndarray = Utils.create_proojected_rect_mesh_array(
+        #     centers=wall_positions,
+        #     positive_offset_size=np.array([self.size, self.size]) / 2.0,
+        #     worldToScreen=camera.worldToScreen.m
+        # )
 
-        # Include the outer layer
-        left += -1
-        right += 1
-        top += -1
-        bottom += 1
+        wall_mesh = Utils.vectorized_projection(camera.worldToScreen.m, self.wall_mesh)
+        n_verticies = wall_mesh.shape[0]
 
-        left = max(0, left)
-        right = max(0, right)
-        top = max(0, top)
-        bottom = max(0, bottom)
+        colors = np.repeat(np.array(arcade.color.WHITE)[np.newaxis, :], n_verticies, axis=0)
 
-        w = self.walls[top:bottom, left:right]
-        i = self._indicies[top:bottom, left:right]
+        shape_list = arcade.ShapeElementList()
+        shape = arcade.create_rectangles_filled_with_colors(wall_mesh, colors)
+        shape_list.append(shape)
+        shape_list.draw()
 
 
-        wall_mask = ~np.isclose(w, 0)
-        wall_inds = np.where(wall_mask)
+        # for y_i, x_i in zip(*wall_inds):
+        #     world_pos = self.cell_pos_to_world_pos(i[y_i, x_i], placement=WPOS_MIDDLE)
+        #     screen_pos = camera.worldToScreen @ world_pos
+        #     side = self.size * camera.zoom
+        #     arcade.draw_rectangle_outline(
+        #         *screen_pos,
+        #         side, side,
+        #         (255, 255, 255),
+        #         border_width=int(max(1, 3 * camera.zoom))
+        #     )
 
-        for y_i, x_i in zip(*wall_inds):
-            world_pos = self.cell_pos_to_world_pos(i[y_i, x_i])
-            screen_pos = camera.worldToScreen @ world_pos
-            side = int(self.size * camera.zoom)
-            draw.rect(
-                surface,
-                (255, 255, 255),
-                Rect(int(screen_pos[0]), int(screen_pos[1]), side, side),
-                width=int(max(1, 3 * camera.zoom))
-            )
+    def draw(self):
+
+        # if arcade.key.L in state.keys_pressing:
+        #     self.draw_grid(surface)
+
+        mid = state.camera.worldToScreen @ np.array([0, 0])
+        side = self.world_size[1] * state.camera.zoom * 2
+        arcade.draw_rectangle_outline(*mid, side, side, arcade.color.WHITE)
+
+        self.draw_walls()
+
+        # self.draw_walls(surface)
+
+        # print(self.world_pos_to_cell_pos(state.camera.screenToWorld @ np.array(pygame.mouse.get_pos())))
         
 
     @classmethod
@@ -137,10 +160,12 @@ class Grid:
         for i, ent in enumerate(ents):
             ent.position = positions[i, :]
 
-    def handle_wall_collision(self, collider_entities: Agent):
 
 
-        ent_pos = collider_entities.position # self.extract_ent_pos(collider_entities)
+    def handle_wall_collision(self):
+
+
+        ent_pos = state.agent_positions # self.extract_ent_pos(collider_entities)
         n_ents = ent_pos.shape[0]
 
         # Collision with map bound
@@ -151,8 +176,8 @@ class Grid:
         cell_pos = self.vectorized_cell_to_world(cell_inds, placement=WPOS_MIDDLE)
 
         # TODO flip should not happen here, fix this : (
-        wall_inds = tuple(np.flip(cell_inds.T, axis=0))
-        # wall_inds = tuple(cell_inds.T)
+        # wall_inds = tuple(np.flip(cell_inds.T, axis=0))
+        wall_inds = tuple(cell_inds.T)
 
         wall_value = self.walls[wall_inds]
         collide_mask = ~np.isclose(wall_value, 0.0)
@@ -183,22 +208,8 @@ class Grid:
         # Resolve the collision using the collision point
         ent_pos[collide_mask] = collision_closest_points
 
-        collider_entities.position = ent_pos  #self.inject_ent_pos(collider_entities, ent_pos)
+        state.agent_positions = ent_pos  #self.inject_ent_pos(collider_entities, ent_pos)
 
-    def tick(self, collider_entities: Agent):
-
-
-        self.handle_wall_collision(collider_entities)
+    def tick(self):
+        self.handle_wall_collision()
             
-            
-
-    def draw(self, surface: Surface):
-
-        keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_l]:
-            self.draw_grid(surface)
-
-        self.draw_walls(surface)
-
-        # print(self.world_pos_to_cell_pos(state.camera.screenToWorld @ np.array(pygame.mouse.get_pos())))

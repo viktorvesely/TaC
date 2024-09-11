@@ -1,10 +1,7 @@
-from pygame import Surface
-import pygame
-
 from ..entities.agents.agent import Agent
 from ..entities.agents.citizen import Citizen  
 from ..entities.agents.thief import Thief
-from ..window import Window
+from ..test import GameWindow
 
 from .world_interface import WorldInterface
 from .grid import Grid
@@ -13,8 +10,8 @@ import numpy as np
 
 
 class World(WorldInterface):
-    def __init__(self, window: Window):
-        self.agents = Agent(50_000)
+    def __init__(self, window: GameWindow):
+        self.agents = Agent(10_000)
         self.window = window
 
         self.grid: Grid = Grid()
@@ -30,19 +27,11 @@ class World(WorldInterface):
     def get_agents(self):
         return self.agents
     
-    def draw(self, surface: Surface):
-
-        surface.fill((0, 0, 0))
-
-        self.agents.draw(surface)
-        self.grid.draw(surface)
-
-        pygame.display.flip()
 
     def tick(self):
         # After each tick Check for collisions and update agent positions
         self.agents.tick()
-        self.grid.tick(self.agents)
+        self.grid.tick()
         
     def handle_collisions(self):
         #Cases to handle:

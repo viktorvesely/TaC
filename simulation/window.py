@@ -6,7 +6,7 @@ from .state import State
 
 state = State()
 
-class Window:
+class Windo:
 
     window_size: np.ndarray = np.array([1000, 600])
 

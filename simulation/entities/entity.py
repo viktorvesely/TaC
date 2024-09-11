@@ -1,5 +1,4 @@
 
-import pygame.surface
 import numpy as np
 from abc import ABC, abstractmethod
 
@@ -15,6 +14,6 @@ class Entity(ABC):
         ...
 
     @abstractmethod
-    def draw(self, surface: pygame.Surface):
+    def draw(self, surface):
         ...
     

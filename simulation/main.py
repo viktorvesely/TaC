@@ -1,8 +1,8 @@
 from time import perf_counter_ns as now, sleep
+import arcade
 import numpy as np
-import pygame
 
-from .window import Window
+from .test import GameWindow
 from .state import State
 from .world.world import World
 from .utils import ms, s, toMs
@@ -12,9 +12,7 @@ state = State()
 
 def realtime_simulation():
 
-    paused = False
-
-    window = Window()
+    window = GameWindow(realtime_simulation_cycle, simulation_draw)
     state.window = window
 
     camera = Camera(window.window_size, np.zeros(2))
@@ -26,70 +24,66 @@ def realtime_simulation():
     state.last_draw = now()
     state.last_tick = now()
 
-    with window:
+    window.run()
 
-        while window.running:
+    # with window:
 
-            window.pygame_event_handler()
+    #     while window.running:
 
-            if pygame.K_p in state.keys_pressed:
-                paused = not paused
+    #         window.pygame_event_handler()
 
-            if paused:
-                paused_simulation_cycle(window, camera, world)
-            else:
-                realtime_simulation_cycle(window, camera, world)
+    #         if pygame.K_p in state.keys_pressed:
+    #             paused = not paused
 
-            sleep(0.005)
+    #         if paused:
+    #             paused_simulation_cycle(window, camera, world)
+    #         else:
+    #             realtime_simulation_cycle(window, camera, world)
 
-def paused_simulation_cycle(window: Window, camera: Camera, world: World):
+    #         sleep(0.005)
 
+def simulation_draw():
+
+    state.world.grid.draw()
+    state.world.agents.draw()
+
+def realtime_simulation_cycle():
+
+    if state.paused:
+        paused_simulation_cycle()
+    else:
+        unpaused_simulation_cycle()
+    
+
+def paused_simulation_cycle():
+    
     d = toMs(state.dTick_target)
-
     state.t = now()
-    state.dDraw = d
-
-    world.draw(window.surface)
     
-    state.last_draw = state.t
+    state.camera.tick()
     
-    camera.tick()
-    
-    if pygame.K_RIGHTBRACKET in state.keys_pressed:
+    if arcade.key.BRACKETLEFT in state.keys_pressed:
         state.dTick = d
-        world.tick()
+        state.world.tick()
 
     state.last_tick = state.t
         
 
-def realtime_simulation_cycle(window: Window, camera: Camera, world: World):
+def unpaused_simulation_cycle():
     
-    camera.tick()
-
-    if not ((now() - state.last_tick) >= state.dTick_target):
-        return
-    
-
+    state.camera.tick()
     state.t = now()
-    state.dDraw = toMs(state.t - state.last_draw)
-    world.draw(window.surface)
-    t_draw = now()
-    state.last_draw = t_draw
-
     state.dTick = toMs(now() - state.last_tick)
-    world.tick()
+    state.world.tick()
     state.last_tick = now()
-
-    
-
 
 
 if __name__ == "__main__":
 
-    realtime_simulation()
 
-
-    if False:
+    if True:
+        realtime_simulation()
+    else:
         import pstats, cProfile
 
         # Use the with statement to profile the function and save the results to a file
