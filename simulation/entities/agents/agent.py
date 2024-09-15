@@ -32,12 +32,7 @@ class Agent(AgentInterface):
         
 
     def draw(self, surface: Surface):
-        
-        additive = np.ones((self.n, 3))
-        additive[:, :2] = self.position
-    
-        projected = state.camera.worldToScreen.m @ additive.T
-        projected = projected[:2, :].T
-
-        for position in projected:
-            pygame.draw.circle(surface, (255, 255, 255), position, 10 * state.camera.zoom)
+       """
+         Draws the agent on the screen. Must be implemented by subclasses.
+       """
+       ...
