@@ -13,21 +13,20 @@ WPOS_MIDDLE = 1
 
 class Grid:
 
-    def __init__(self, size: float = 40, grid_size: int = 40) -> None:
+    def __init__(self, size: float = 40, n_grids: int = 40) -> None:
         
         self.size = size
-        self.world_size = np.array([-size, size]) * grid_size
-        self.world_TL = np.array([-size, -size]) * grid_size
-        self.ngrids = grid_size * 2
+        self._tomid: np.ndarray = np.ones(2) * (self.size / 2)
+        self.world_size = np.array([-size, size], dtype=np.float64) * n_grids
+        self.world_TL = np.array([-size, -size], dtype=np.float64) * n_grids
+        self.ngrids = n_grids * 2
 
-        self.walls = np.random.choice([1.0, 0.0], p=[0.1, 0.9], size=(self.ngrids, self.ngrids))
-
-        self._indicies = np.empty((self.ngrids, self.ngrids), dtype=object)    
+        self.walls: np.ndarray = np.random.choice([1.0, 0.0], p=[0.1, 0.9], size=(self.ngrids, self.ngrids))
+        self.grid_indicies = np.empty((self.ngrids, self.ngrids), dtype=object)    
         for i in range(self.ngrids):
             for j in range(self.ngrids):
-                self._indicies[i, j] = (j, i)
+                self.grid_indicies[i, j] = (j, i)
 
-        self._tomid: np.ndarray = np.ones(2) * (self.size / 2)
     
 
     def world_pos_to_cell_pos(self, pos: np.ndarray) -> tuple[int, int]:
@@ -88,11 +87,7 @@ class Grid:
             draw.line(surface, (255, 255, 255), screen_start, screen_end)
             y += self.size
 
-    def draw_walls(self, surface: Surface):
-        
-        camera = state.camera
-        top_left = camera.screenToWorld @ np.zeros(2)
-        bottom_right = camera.screenToWorld @ state.window.window_size
+    def get_walls_inds_from_to(self, top_left: np.ndarray, bottom_right: np.ndarray) -> tuple[int, int, int, int]:
 
         left, top = self.world_pos_to_cell_pos(top_left)
         right, bottom = self.world_pos_to_cell_pos(bottom_right)
@@ -108,9 +103,16 @@ class Grid:
         top = max(0, top)
         bottom = max(0, bottom)
 
-        w = self.walls[top:bottom, left:right]
-        i = self._indicies[top:bottom, left:right]
+        return left, right, top, bottom
 
+    def draw_walls(self, surface: Surface):
+        
+        camera = state.camera
+        top_left = camera.screenToWorld @ np.zeros(2)
+        bottom_right = camera.screenToWorld @ state.window.window_size
+
+        left, right, top, bottom = self.get_walls_inds_from_to(top_left, bottom_right)
+        w, i = self.walls[top:bottom, left:right], self.grid_indicies[top:bottom, left:right]
 
         wall_mask = ~np.isclose(w, 0)
         wall_inds = np.where(wall_mask)
@@ -137,10 +139,10 @@ class Grid:
         for i, ent in enumerate(ents):
             ent.position = positions[i, :]
 
-    def handle_wall_collision(self, collider_entities: Agent):
+    def handle_wall_collision(self):
 
 
-        ent_pos = collider_entities.position # self.extract_ent_pos(collider_entities)
+        ent_pos = state.agent_position
         n_ents = ent_pos.shape[0]
 
         # Collision with map bound
@@ -151,6 +153,7 @@ class Grid:
         cell_pos = self.vectorized_cell_to_world(cell_inds, placement=WPOS_MIDDLE)
 
         # TODO flip should not happen here, fix this : (
+        # It actually should happen since the y direction is reversed between world coordinate and cell coordinate
         wall_inds = tuple(np.flip(cell_inds.T, axis=0))
         # wall_inds = tuple(cell_inds.T)
 
@@ -183,12 +186,12 @@ class Grid:
         # Resolve the collision using the collision point
         ent_pos[collide_mask] = collision_closest_points
 
-        collider_entities.position = ent_pos  #self.inject_ent_pos(collider_entities, ent_pos)
+        state.agent_position = ent_pos  #self.inject_ent_pos(collider_entities, ent_pos)
 
-    def tick(self, collider_entities: Agent):
+    def tick(self):
 
 
-        self.handle_wall_collision(collider_entities)
+        self.handle_wall_collision()
             
             
 

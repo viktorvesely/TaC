@@ -11,11 +11,9 @@ class AgentInterface(Entity):
     def __init__(self, positon: ndarray) -> None:
         super().__init__(positon)
 
-        self.velocity: np.ndarray = np.zeros(2)
-
 
     def tick(self):
 
-        self.position = self.position + self.velocity * state.dTick
+        state.agent_position = state.agent_position + state.agent_velocity * state.dTick
         
         return super().tick()

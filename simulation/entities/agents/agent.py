@@ -13,12 +13,12 @@ class Agent(AgentInterface):
     def __init__(self, n: int):
         super().__init__(None)
         
-        self.position = (np.random.random((n, 2)) -  0.5) * 400
+        state.agent_position = (np.random.random((n, 2)) -  0.5) * 400
         self.max_speed = 0.1
         self.n = n
-        self.velocity = np.zeros((n, 2))
+        state.agent_velocity = np.zeros((n, 2))
 
-        self._angle = np.random.random(n) * np.pi * 2
+        state.agent_angle = np.random.random(n) * np.pi * 2
 
 
     def tick(self):
@@ -27,14 +27,14 @@ class Agent(AgentInterface):
         """
         super().tick()
 
-        self._angle = self._angle + (0.0001 * state.dTick) % (np.pi * 2)
-        self.velocity = np.vstack((np.cos(self._angle), np.sin(self._angle))).T * self.max_speed
+        state.agent_angle = state.agent_angle + (0.0001 * state.dTick) % (np.pi * 2)
+        state.agent_velocity = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T * self.max_speed
         
 
     def draw(self, surface: Surface):
         
         additive = np.ones((self.n, 3))
-        additive[:, :2] = self.position
+        additive[:, :2] = state.agent_position
     
         projected = state.camera.worldToScreen.m @ additive.T
         projected = projected[:2, :].T

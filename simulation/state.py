@@ -1,9 +1,11 @@
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 if TYPE_CHECKING:
     from .events.event import Event
     from .window import Window
-    from .world import world
+    from .world.world import World
     from .camera import Camera
 
 from .utils import ms
@@ -19,7 +21,7 @@ class State(metaclass=Singleton):
 
     def __init__(self) -> None:
         
-        self.world: world = None
+        self.world: World = None
         self.events: list[Event] = []
         self.window: Window | None = None
 
@@ -36,4 +38,8 @@ class State(metaclass=Singleton):
         self.camera: Camera = None
 
         self.keys_pressed: set = set()
+        
+        self.agent_position: np.ndarray = None
+        self.agent_velocity: np.ndarray = None
+        self.agent_angle: np.ndarray = None
 

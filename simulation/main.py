@@ -45,19 +45,15 @@ def realtime_simulation():
 def paused_simulation_cycle(window: Window, camera: Camera, world: World):
 
     d = toMs(state.dTick_target)
+    state.t = now()    
 
-    state.t = now()
-    state.dDraw = d
-
-    world.draw(window.surface)
-    
-    state.last_draw = state.t
-    
     camera.tick()
     
     if pygame.K_RIGHTBRACKET in state.keys_pressed:
         state.dTick = d
         world.tick()
+
+    world.draw(window.surface)
 
     state.last_tick = state.t
         
@@ -69,16 +65,12 @@ def realtime_simulation_cycle(window: Window, camera: Camera, world: World):
     if not ((now() - state.last_tick) >= state.dTick_target):
         return
     
-
     state.t = now()
-    state.dDraw = toMs(state.t - state.last_draw)
-    world.draw(window.surface)
-    t_draw = now()
-    state.last_draw = t_draw
-
-    state.dTick = toMs(now() - state.last_tick)
+    state.dTick = toMs(state.t - state.last_tick)
     world.tick()
     state.last_tick = now()
+
+    world.draw(window.surface)
 
     
 

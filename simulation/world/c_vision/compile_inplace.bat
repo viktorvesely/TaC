@@ -1,0 +1,1 @@
+py -3.12 compile_vision.py build_ext --inplace

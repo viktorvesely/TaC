@@ -8,16 +8,17 @@ from ..window import Window
 
 from .world_interface import WorldInterface
 from .grid import Grid
+from .vision_interface import Vision
 
 import numpy as np
 
-
 class World(WorldInterface):
     def __init__(self, window: Window):
-        self.agents = Agent(50_000)
+        self.agents = Agent(1)
         self.window = window
 
         self.grid: Grid = Grid()
+        self.vision: Vision = Vision(self.grid)
         
     
     def add_agent(self, agent: Agent):
@@ -36,13 +37,15 @@ class World(WorldInterface):
 
         self.agents.draw(surface)
         self.grid.draw(surface)
+        # self.vision.draw(surface)
 
         pygame.display.flip()
 
     def tick(self):
         # After each tick Check for collisions and update agent positions
         self.agents.tick()
-        self.grid.tick(self.agents)
+        self.grid.tick()
+        self.vision.tick()
         
     def handle_collisions(self):
         #Cases to handle:
