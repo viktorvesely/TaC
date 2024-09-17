@@ -13,7 +13,7 @@ WPOS_MIDDLE = 1
 
 class Grid:
 
-    def __init__(self, size: float = 40, n_grids: int = 40) -> None:
+    def __init__(self, size: float = 40, n_grids: int = 30) -> None:
         
         self.size = size
         self._tomid: np.ndarray = np.ones(2) * (self.size / 2)
@@ -25,16 +25,16 @@ class Grid:
         self.grid_indicies = np.empty((self.ngrids, self.ngrids), dtype=object)    
         for i in range(self.ngrids):
             for j in range(self.ngrids):
-                self.grid_indicies[i, j] = (j, i)
+                self.grid_indicies[i, j] = (i, j)
 
     
 
     def world_pos_to_cell_pos(self, pos: np.ndarray) -> tuple[int, int]:
         pos = pos - self.world_TL
-        return int(pos[0] // self.size), int(pos[1] // self.size)
+        return int(pos[1] // self.size), int(pos[0] // self.size)
     
     def cell_pos_to_world_pos(self, pos: tuple[int, int], placement: int = WPOS_TL) -> np.ndarray:
-        out = np.array(pos) * self.size + self.world_TL
+        out = np.array([pos[1], pos[0]]) * self.size + self.world_TL
 
         if placement == WPOS_MIDDLE:
             out = out + self._tomid
@@ -46,10 +46,11 @@ class Grid:
         positions (n_entities, 2)
         """
         positions = positions - self.world_TL
-        return (positions // self.size).astype(int)
+        coords = (positions // self.size).astype(int)
+        return np.flip(coords, axis=1)
 
-    def vectorized_cell_to_world(self, positions: np.ndarray, placement: int = WPOS_TL) -> np.ndarray:
-        out = (positions).astype(float) * self.size + self.world_TL
+    def vectorized_cell_to_world(self, coords: np.ndarray, placement: int = WPOS_TL) -> np.ndarray:
+        out = (np.flip(coords, axis=1)).astype(float) * self.size + self.world_TL
 
         if placement == WPOS_MIDDLE:
             out = out + self._tomid
@@ -89,8 +90,8 @@ class Grid:
 
     def get_walls_inds_from_to(self, top_left: np.ndarray, bottom_right: np.ndarray) -> tuple[int, int, int, int]:
 
-        left, top = self.world_pos_to_cell_pos(top_left)
-        right, bottom = self.world_pos_to_cell_pos(bottom_right)
+        top, left = self.world_pos_to_cell_pos(top_left)
+        bottom, right = self.world_pos_to_cell_pos(bottom_right)
 
         # Include the outer layer
         left += -1
@@ -117,8 +118,8 @@ class Grid:
         wall_mask = ~np.isclose(w, 0)
         wall_inds = np.where(wall_mask)
 
-        for y_i, x_i in zip(*wall_inds):
-            world_pos = self.cell_pos_to_world_pos(i[y_i, x_i])
+        for local_i, local_j in zip(*wall_inds):
+            world_pos = self.cell_pos_to_world_pos(i[local_i, local_j])
             screen_pos = camera.worldToScreen @ world_pos
             side = int(self.size * camera.zoom)
             draw.rect(
@@ -152,10 +153,7 @@ class Grid:
         cell_inds = self.vectorized_world_to_cell(ent_pos)
         cell_pos = self.vectorized_cell_to_world(cell_inds, placement=WPOS_MIDDLE)
 
-        # TODO flip should not happen here, fix this : (
-        # It actually should happen since the y direction is reversed between world coordinate and cell coordinate
-        wall_inds = tuple(np.flip(cell_inds.T, axis=0))
-        # wall_inds = tuple(cell_inds.T)
+        wall_inds = tuple(cell_inds.T)
 
         wall_value = self.walls[wall_inds]
         collide_mask = ~np.isclose(wall_value, 0.0)

@@ -32,8 +32,8 @@ class Vision:
         vision_mask = ~np.isclose(v, 0)
         vision_inds = np.where(vision_mask)
 
-        for y_i, x_i in zip(*vision_inds):
-            world_pos = self.grid.cell_pos_to_world_pos(i[y_i, x_i])
+        for local_i, local_j in zip(*vision_inds):
+            world_pos = self.grid.cell_pos_to_world_pos(i[local_i, local_j])
             screen_pos = camera.worldToScreen @ world_pos
             side = int(self.grid.size * camera.zoom)
             pygame.draw.rect(

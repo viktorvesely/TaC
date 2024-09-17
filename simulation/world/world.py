@@ -14,7 +14,7 @@ import numpy as np
 
 class World(WorldInterface):
     def __init__(self, window: Window):
-        self.agents = Agent(1)
+        self.agents = Agent(40)
         self.window = window
 
         self.grid: Grid = Grid()
@@ -37,7 +37,7 @@ class World(WorldInterface):
 
         self.agents.draw(surface)
         self.grid.draw(surface)
-        # self.vision.draw(surface)
+        self.vision.draw(surface)
 
         pygame.display.flip()
 

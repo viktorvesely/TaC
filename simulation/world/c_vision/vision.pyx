@@ -1,7 +1,9 @@
 import numpy as np
 cimport numpy as cnp
 from libc.math cimport sin, cos
+from libc.stdio cimport printf
 from cython.parallel import prange
+from cython import boundscheck
 
 cnp.import_array()
 
@@ -9,13 +11,20 @@ cdef struct Coords:
     int i
     int j
 
-cdef Coords world_to_cell(double[2] pos, double[:] world_TL, double grid_size) noexcept nogil:
+@boundscheck(False)
+cdef Coords world_to_cell(double[2] pos, double[:] world_TL, double grid_size, int i_tot, int j_tot) noexcept nogil:
     # TODO fix out of bounds indicies
     cdef Coords coords
-    coords.i = <int>((world_TL[1] - pos[1]) // grid_size)
-    coords.j = <int>((world_TL[0] - pos[0]) // grid_size)
-    return coords
+    coords.i = <int>((pos[1] - world_TL[1]) // grid_size)
+    coords.j = <int>((pos[0] - world_TL[0]) // grid_size)
 
+    if (coords.i < 0) or (coords.i >= i_tot):
+        coords.i = -1
+
+    if (coords.j < 0) or (coords.j >= j_tot):
+        coords.j = -1
+
+    return coords
 
 cdef void cast_ray(
     double ray_angle,
@@ -26,7 +35,9 @@ cdef void cast_ray(
     double[:, :] walls,
     double[:, :] vision_field,
     double[:] world_TL,
-    double grid_size
+    double grid_size,
+    int i_tot,
+    int j_tot
 ) noexcept nogil:
 
 
@@ -44,7 +55,10 @@ cdef void cast_ray(
         position[0] = x_origin + delta[0] * (<double>i_step)
         position[1] = y_origin + delta[1] * (<double>i_step)
 
-        coords = world_to_cell(position, world_TL, grid_size)
+        coords = world_to_cell(position, world_TL, grid_size, i_tot, j_tot)
+
+        if (coords.i == -1) or (coords.j == -1):
+            break
 
         if walls[coords.i, coords.j] > 0.0:
             break
@@ -61,7 +75,9 @@ cdef void _generate_vision_field(
     double vision_length,
     double fov,
     int n_rays,
-    double[:, :] vision_field
+    double[:, :] vision_field,
+    int i_tot,
+    int j_tot
 ) noexcept nogil:
     cdef double step_size = grid_size / 2.0
     cdef int n_steps = <int> (vision_length / step_size) 
@@ -90,7 +106,7 @@ cdef void _generate_vision_field(
             cast_ray(
                 ray_angle, step_size, n_steps,
                 agent_x, agent_y, walls, vision_field,
-                world_TL, grid_size
+                world_TL, grid_size, i_tot, j_tot
             )
 
 def generate_vision_field(
@@ -104,9 +120,9 @@ def generate_vision_field(
     int n_rays,
     ):
 
-    cdef int rows = walls.shape[0]
-    cdef int cols = walls.shape[1]
-    vision_field_array = np.zeros((rows, cols), dtype=np.float64)
+    cdef int i_tot = walls.shape[0]
+    cdef int j_tot = walls.shape[1]
+    vision_field_array = np.zeros((i_tot, j_tot), dtype=np.float64)
     cdef double[:, :] vision_field = vision_field_array
     
     _generate_vision_field(
@@ -118,7 +134,9 @@ def generate_vision_field(
         vision_length,
         fov,
         n_rays,
-        vision_field
+        vision_field,
+        i_tot,
+        j_tot
     )
 
     return vision_field_array
