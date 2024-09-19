@@ -77,9 +77,10 @@ cdef void cast_ray_filling(
 
 
         # Density vision reduction
-        density_value = density[coords.i, coords.j]
-        vision_reduction = 0.37 / (density_value + 0.37) 
-        vision_strength *= vision_reduction
+        # TODO no self density intersection
+        # density_value = density[coords.i, coords.j]
+        # vision_reduction = 0.37 / (density_value + 0.37) 
+        # vision_strength *= vision_reduction
 
         if wall_value == 0.0:
             vision_field[coords.i, coords.j] += vision_strength

@@ -1,10 +1,13 @@
+from typing import Callable
 from pygame import Surface
 import pygame
+import numpy as np
+
 from .agent_interface import AgentInterface
 from .btree.btState import BTState
-import numpy as np
+from .agent_actions import AgentActions
+
 from ...state import State
-import time
 
 state = State()
 
@@ -19,20 +22,11 @@ class Agent(AgentInterface):
         state.agent_velocity = np.zeros((n, 2))
         state.agent_angle = np.random.random(n) * np.pi * 2
 
-        self.roaming_timer = np.zeros(n)
+        self.actions: list[Callable[[int], Callable]] = [AgentActions.select_action for _ in range(n)]
 
 
-    def start_roaming(self, i_agent: int):
-        self.roaming_timer[i_agent] = state.t + np.random.random() * 3000 + 2000 
-
-    def roaming(self, i_agent: int) -> bool:
-        
-        if self.roaming_timer[i_agent] > state.t:
-            self.roaming_timer[i_agent] = 0
-            return True
-
+    def look_random(self, i_agent: int):
         state.agent_angle[i_agent] = state.agent_angle[i_agent] + (0.0008 * state.dTick) % (np.pi * 2)
-        return False
 
     def tick(self):
         """
@@ -41,6 +35,9 @@ class Agent(AgentInterface):
         
         super().tick()
 
+        for i, action in enumerate(self.actions):
+            nex_action = action(i)
+            self.actions[i] = nex_action
         # 
         state.agent_velocity = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T * self.max_speed
         

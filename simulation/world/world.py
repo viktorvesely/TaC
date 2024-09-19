@@ -2,7 +2,6 @@ from pygame import Surface
 import pygame
 
 from ..entities.agents.agent import Agent
-from ..entities.agents.behaviour.agent_behaviour import AgentBehaviour
 from ..window import Window
 
 from .world_interface import WorldInterface
@@ -24,7 +23,6 @@ class World(WorldInterface):
         self.pois = PointsOfInterests(self.grid)
         self.pois.add_random(5)
         self.maps = GoogleMaps(self.grid, self.pois)
-        self.trees = [AgentBehaviour(i) for i in range(n_agents)]
             
     
     def add_agent(self, agent: Agent):
@@ -55,11 +53,6 @@ class World(WorldInterface):
         self.agents.tick()
         self.grid.tick()
         self.vision.tick()
-    
-
-        for tree in self.trees:
-            tree.tick()
-
         # self.maps.tick()
         
     def handle_collisions(self):
