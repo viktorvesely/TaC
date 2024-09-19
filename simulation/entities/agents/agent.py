@@ -4,7 +4,6 @@ import pygame
 import numpy as np
 
 from .agent_interface import AgentInterface
-from .btree.btState import BTState
 from .agent_actions import AgentActions
 
 from ...state import State
