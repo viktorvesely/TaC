@@ -8,9 +8,10 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 numpy = "^2.1.1"
-pillow = "^10.4.0"
 pygame = "^2.6.0"
-mesa = "^2.3.4"
+py-trees = "^2.2.3"
+cython = "^3.0.11"
+setuptools = "^75.1.0"
 
 
 [build-system]

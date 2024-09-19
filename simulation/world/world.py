@@ -42,7 +42,6 @@ class World(WorldInterface):
     def draw(self, surface: Surface):
 
         surface.fill((0, 0, 0))
-
         self.agents.draw(surface)
         self.grid.draw(surface)
         self.pois.draw(surface)

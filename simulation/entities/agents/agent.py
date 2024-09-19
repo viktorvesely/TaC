@@ -1,7 +1,7 @@
 from pygame import Surface
 import pygame
 from .agent_interface import AgentInterface
-
+from .btree.btState import BTState
 import numpy as np
 from ...state import State
 
@@ -23,6 +23,7 @@ class Agent(AgentInterface):
         """
         Moves the agent in the environment in a random direction.
         """
+        
         super().tick()
 
 
