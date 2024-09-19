@@ -1,12 +1,16 @@
-from time import perf_counter_ns as now, sleep
+from time import sleep, perf_counter_ns
 import numpy as np
 import pygame
 
 from .window import Window
 from .state import State
 from .world.world import World
-from .utils import ms, s, toMs
+from .utils import toMs
 from .camera import Camera
+
+
+def now():
+    return toMs(perf_counter_ns())
 
 state = State()
 
@@ -44,8 +48,8 @@ def realtime_simulation():
 
 def paused_simulation_cycle(window: Window, camera: Camera, world: World):
 
-    d = toMs(state.dTick_target)
-    state.t = now()    
+    d = state.dTick_target
+    state.t = now()  
 
     camera.tick()
     
@@ -62,11 +66,11 @@ def realtime_simulation_cycle(window: Window, camera: Camera, world: World):
     
     camera.tick()
 
-    if not ((now() - state.last_tick) >= state.dTick_target):
+    if not (now() - state.last_tick >= state.dTick_target):
         return
     
     state.t = now()
-    state.dTick = toMs(state.t - state.last_tick)
+    state.dTick = state.t - state.last_tick
     world.tick()
     state.last_tick = now()
 
