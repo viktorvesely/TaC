@@ -13,7 +13,7 @@ WPOS_MIDDLE = 1
 
 class Grid:
 
-    def __init__(self, size: float = 40, n_grids: int = 30) -> None:
+    def __init__(self, size: float = 40, n_grids: int = 4) -> None:
         
         self.size = size
         self._tomid: np.ndarray = np.ones(2) * (self.size / 2)
@@ -21,11 +21,15 @@ class Grid:
         self.world_TL = np.array([-size, -size], dtype=np.float64) * n_grids
         self.ngrids = n_grids * 2
 
-        self.walls: np.ndarray = np.random.choice([1.0, 0.0], p=[0.1, 0.9], size=(self.ngrids, self.ngrids))
-        self.grid_indicies = np.empty((self.ngrids, self.ngrids), dtype=object)    
+        self.walls: np.ndarray = np.random.choice([1.0, 0.0], p=[0.05, 0.95], size=(self.ngrids, self.ngrids))
+        self.grid_indicies = np.empty((self.ngrids, self.ngrids), dtype=object)
         for i in range(self.ngrids):
             for j in range(self.ngrids):
                 self.grid_indicies[i, j] = (i, j)
+
+        self.density: np.ndarray = np.zeros_like(self.walls)
+        
+
 
     
 
@@ -115,7 +119,7 @@ class Grid:
         left, right, top, bottom = self.get_walls_inds_from_to(top_left, bottom_right)
         w, i = self.walls[top:bottom, left:right], self.grid_indicies[top:bottom, left:right]
 
-        wall_mask = ~np.isclose(w, 0)
+        wall_mask = np.isclose(w, 1.0)
         wall_inds = np.where(wall_mask)
 
         for local_i, local_j in zip(*wall_inds):
@@ -186,11 +190,17 @@ class Grid:
 
         state.agent_position = ent_pos  #self.inject_ent_pos(collider_entities, ent_pos)
 
+    def calculate_density(self):
+        agent_coords = self.vectorized_world_to_cell(state.agent_position)
+        i, j = agent_coords.T
+        self.density = np.zeros((self.ngrids, self.ngrids))
+        np.add.at(self.density, (i, j), 1.0)
+    
     def tick(self):
 
-
         self.handle_wall_collision()
-            
+        self.calculate_density()
+        
             
 
     def draw(self, surface: Surface):

@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import numpy as np
+
 def ms(t_ms: float) -> int:
     return int(t_ms * (10 ** 6))
 
@@ -19,3 +21,11 @@ class Utils:
     def experiments_path() -> Path:
         return Utils.package_path() / "data" / "experiments"
     
+    @staticmethod
+    def vectorized_projection(matrix: np.ndarray, points: np.ndarray) -> np.ndarray:
+        
+        additive = np.ones((points.shape[0], 3))
+        additive[:, :2] = points
+        
+        projected = (matrix @ additive.T).T
+        return projected[:, :2]

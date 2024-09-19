@@ -26,18 +26,20 @@ cdef Coords world_to_cell(double[2] pos, double[:] world_TL, double grid_size, i
 
     return coords
 
-cdef void cast_ray(
+@boundscheck(False)
+cdef void cast_ray_filling(
     double ray_angle,
     double step_size,
     int n_steps,
     double x_origin,
     double y_origin,
     double[:, :] walls,
+    double[:, :] density,
     double[:, :] vision_field,
     double[:] world_TL,
     double grid_size,
     int i_tot,
-    int j_tot
+    int j_tot,
 ) noexcept nogil:
 
 
@@ -48,6 +50,11 @@ cdef void cast_ray(
     cdef double[2] position
     cdef Coords coords
     cdef int i_step
+    cdef double vision_strength = 1.0;
+    cdef double vision_falloff = (vision_strength + 0.1) / (<double>n_steps)
+    cdef double vision_reduction
+    cdef double wall_value
+    cdef double density_value
 
     # Skip first step due to it being in the same spot for all rays
     for i_step in range(1, n_steps + 1):
@@ -60,16 +67,32 @@ cdef void cast_ray(
         if (coords.i == -1) or (coords.j == -1):
             break
 
-        if walls[coords.i, coords.j] > 0.0:
+        # Wall vision reduction
+        wall_value = walls[coords.i, coords.j]
+        if wall_value >= 0.999:
             break
 
-        vision_field[coords.i, coords.j] = 1.0
+        vision_reduction = 1.0 - wall_value
+        vision_strength *= vision_reduction
+
+
+        # Density vision reduction
+        density_value = density[coords.i, coords.j]
+        vision_reduction = 0.37 / (density_value + 0.37) 
+        vision_strength *= vision_reduction
+
+        if wall_value == 0.0:
+            vision_field[coords.i, coords.j] += vision_strength
+        
+        vision_strength -= vision_falloff
+        vision_strength = max(0.0, vision_strength)
 
         
 cdef void _generate_vision_field(
     double[:, :] agent_position,
     double[:] agent_angles,
     double[:, :] walls,
+    double[:, :] density,
     double[:] world_TL,
     double grid_size,
     double vision_length,
@@ -103,9 +126,9 @@ cdef void _generate_vision_field(
         for i_ray in range(n_rays):
             ray_angle = ray_angle_start + (<double>i_ray) * fov_step
             
-            cast_ray(
+            cast_ray_filling(
                 ray_angle, step_size, n_steps,
-                agent_x, agent_y, walls, vision_field,
+                agent_x, agent_y, walls, density, vision_field,
                 world_TL, grid_size, i_tot, j_tot
             )
 
@@ -113,6 +136,7 @@ def generate_vision_field(
     double[:, :] agent_position not None,
     double[:] agent_angles not None,
     double[:, :] walls not None,
+    double[:, :] density not None,
     double[:] world_TL,
     double grid_size,
     double vision_length,
@@ -129,6 +153,7 @@ def generate_vision_field(
         agent_position,
         agent_angles,
         walls,
+        density,
         world_TL,
         grid_size,
         vision_length,
@@ -139,4 +164,4 @@ def generate_vision_field(
         j_tot
     )
 
-    return vision_field_array
+    return np.clip(vision_field_array, 0.0, 1.0)

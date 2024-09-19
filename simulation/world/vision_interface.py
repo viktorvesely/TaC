@@ -36,9 +36,10 @@ class Vision:
             world_pos = self.grid.cell_pos_to_world_pos(i[local_i, local_j])
             screen_pos = camera.worldToScreen @ world_pos
             side = int(self.grid.size * camera.zoom)
+            vision = v[local_i, local_j]
             pygame.draw.rect(
                 surface,
-                (255, 0, 0),
+                (int(255 * vision), 0, 0),
                 Rect(int(screen_pos[0]), int(screen_pos[1]), side, side),
                 width=int(max(1, 3 * camera.zoom))
             )
@@ -47,7 +48,7 @@ class Vision:
         
         keys = pygame.key.get_pressed()
 
-        if not keys[pygame.K_d]:
+        if not keys[pygame.K_x]:
             self.draw_vision_map(surface)
 
     def tick(self):
@@ -55,6 +56,7 @@ class Vision:
             state.agent_position,
             state.agent_angle,
             self.grid.walls,
+            self.grid.density,
             self.grid.world_TL,
             self.grid.size,
             self.vision_length,

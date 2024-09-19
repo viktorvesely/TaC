@@ -7,17 +7,15 @@ from ...state import State
 
 state = State()
 
-
 class Agent(AgentInterface):
 
     def __init__(self, n: int):
         super().__init__(None)
         
-        state.agent_position = (np.random.random((n, 2)) -  0.5) * 400
+        state.agent_position = (np.random.random((n, 2)) -  0.5) * 300
         self.max_speed = 0.1
         self.n = n
         state.agent_velocity = np.zeros((n, 2))
-
         state.agent_angle = np.random.random(n) * np.pi * 2
 
 
@@ -27,7 +25,8 @@ class Agent(AgentInterface):
         """
         super().tick()
 
-        state.agent_angle = state.agent_angle + (0.0001 * state.dTick) % (np.pi * 2)
+
+        # state.agent_angle = state.agent_angle + (0.0001 * state.dTick) % (np.pi * 2)
         state.agent_velocity = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T * self.max_speed
         
 

@@ -9,20 +9,28 @@ from ..window import Window
 from .world_interface import WorldInterface
 from .grid import Grid
 from .vision_interface import Vision
+from .poi import PointsOfInterests
+from .navigation import GoogleMaps
 
 import numpy as np
 
 class World(WorldInterface):
     def __init__(self, window: Window):
-        self.agents = Agent(40)
-        self.window = window
-
-        self.grid: Grid = Grid()
-        self.vision: Vision = Vision(self.grid)
         
+        self.window = window
+        self.agents = Agent(20)
+        self.grid: Grid = Grid(n_grids=100)
+        self.vision: Vision = Vision(self.grid)
+        self.pois = PointsOfInterests(self.grid)
+        self.pois.add_random(5)
+        self.maps = GoogleMaps(self.grid, self.pois)
+            
     
     def add_agent(self, agent: Agent):
         self.agents.append(agent)
+
+    def add_pois(self, N: int = 1):
+        self.pois.add_random(N)
     
     def step(self):
         for agent in self.agents:
@@ -37,6 +45,7 @@ class World(WorldInterface):
 
         self.agents.draw(surface)
         self.grid.draw(surface)
+        self.pois.draw(surface)
         self.vision.draw(surface)
 
         pygame.display.flip()
@@ -46,6 +55,7 @@ class World(WorldInterface):
         self.agents.tick()
         self.grid.tick()
         self.vision.tick()
+        # self.maps.tick()
         
     def handle_collisions(self):
         #Cases to handle:
