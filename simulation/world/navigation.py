@@ -32,8 +32,9 @@ class GoogleMaps:
     def heuristic(self, source, destination):
         return abs(source[0] - destination[0]) + abs(source[1] - destination[1]) + self.grid.density[source[0], source[1]]
     
-    def point(self, i_agent: int, agent_coords: np.ndarray):
+    def point(self, i_agent: int) -> bool:
 
+        agent_coords: np.ndarray = state.agent_coords[i_agent, :] 
         path = self.paths[i_agent]
         nex_step = path[0, :]
 
@@ -42,7 +43,7 @@ class GoogleMaps:
 
         if np.max(np.abs(agent_coords - goal_coord)) <= 1:
             self.paths[i_agent] = None
-            return
+            return True
 
         if np.allclose(agent_coords, nex_step):
             self.paths[i_agent] = path[1:, :]
@@ -57,10 +58,17 @@ class GoogleMaps:
         # angle = np.arctan2(-delta[1], delta[0]) + (pi / 2)
         angle = np.arctan2(delta[1], delta[0])
         state.agent_angle[i_agent] = angle
+
+        return False
         
+    def navigate_agent(self, i_agent: int):
+        agent_coords = state.agent_coords[i_agent]
+        rand_poi_i = np.random.choice(self.pois.coords.shape[0])
+        new_path = self.navigate(tuple(agent_coords), tuple(self.pois.coords[rand_poi_i]))
+        self.paths[i_agent] = new_path
 
     def tick(self):
-
+        return
         agents_coords = self.grid.vectorized_world_to_cell(state.agent_position)
         for i_agent, path in enumerate(self.paths):
 

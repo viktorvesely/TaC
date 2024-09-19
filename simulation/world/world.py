@@ -2,8 +2,7 @@ from pygame import Surface
 import pygame
 
 from ..entities.agents.agent import Agent
-from ..entities.agents.citizen import Citizen  
-from ..entities.agents.thief import Thief
+from ..entities.agents.behaviour.agent_behaviour import AgentBehaviour
 from ..window import Window
 
 from .world_interface import WorldInterface
@@ -17,13 +16,15 @@ import numpy as np
 class World(WorldInterface):
     def __init__(self, window: Window):
         
+        n_agents = 1
         self.window = window
-        self.agents = Agent(20)
-        self.grid: Grid = Grid(n_grids=100)
+        self.agents = Agent(n_agents)
+        self.grid: Grid = Grid(n_grids=20)
         self.vision: Vision = Vision(self.grid)
         self.pois = PointsOfInterests(self.grid)
         self.pois.add_random(5)
         self.maps = GoogleMaps(self.grid, self.pois)
+        self.trees = [AgentBehaviour(i) for i in range(n_agents)]
             
     
     def add_agent(self, agent: Agent):
@@ -54,6 +55,11 @@ class World(WorldInterface):
         self.agents.tick()
         self.grid.tick()
         self.vision.tick()
+    
+
+        for tree in self.trees:
+            tree.tick()
+
         # self.maps.tick()
         
     def handle_collisions(self):
@@ -69,18 +75,6 @@ class World(WorldInterface):
         pass
     
     def resolve_collision(self, agent1: Agent, agent2: Agent):
-        pass
-    
-    def handle_thief_citizen_collision(self, thief: Thief, citizen: Citizen):
-        # Call behavior when a thief collides with a citizen
-        pass
-
-    def handle_thief_thief_collision(self, thief1: Thief, thief2: Thief):
-        # Call specific behavior when thieves collide
-        pass
-
-    def handle_citizen_citizen_collision(self, citizen1: Citizen, citizen2: Citizen):
-        # Call specific behavior when citizens collide
         pass
                     
     def populate_world(self, n_agents: int):

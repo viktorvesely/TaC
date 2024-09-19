@@ -4,6 +4,7 @@ from .agent_interface import AgentInterface
 from .btree.btState import BTState
 import numpy as np
 from ...state import State
+import time
 
 state = State()
 
@@ -18,6 +19,20 @@ class Agent(AgentInterface):
         state.agent_velocity = np.zeros((n, 2))
         state.agent_angle = np.random.random(n) * np.pi * 2
 
+        self.roaming_timer = np.zeros(n)
+
+
+    def start_roaming(self, i_agent: int):
+        self.roaming_timer[i_agent] = state.t + np.random.random() * 3000 + 2000 
+
+    def roaming(self, i_agent: int) -> bool:
+        
+        if self.roaming_timer[i_agent] > state.t:
+            self.roaming_timer[i_agent] = 0
+            return True
+
+        state.agent_angle[i_agent] = state.agent_angle[i_agent] + (0.0008 * state.dTick) % (np.pi * 2)
+        return False
 
     def tick(self):
         """
@@ -26,8 +41,7 @@ class Agent(AgentInterface):
         
         super().tick()
 
-
-        # state.agent_angle = state.agent_angle + (0.0001 * state.dTick) % (np.pi * 2)
+        # 
         state.agent_velocity = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T * self.max_speed
         
 

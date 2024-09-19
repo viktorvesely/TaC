@@ -29,9 +29,8 @@ class State(metaclass=Singleton):
         self.last_draw: int = 0
         self.last_tick: int = 0
 
-        self.dTick_target: int = ms(17)
-        self.dTick: int = 0
-        self.dDraw: int = 0
+        self.dTick_target: float = 17
+        self.dTick: float = 0
 
         self.timescale: float = 1
 
@@ -42,4 +41,5 @@ class State(metaclass=Singleton):
         self.agent_position: np.ndarray = None
         self.agent_velocity: np.ndarray = None
         self.agent_angle: np.ndarray = None
+        self.agent_coords: np.ndarray = None
 
