@@ -12,7 +12,7 @@ from .vision_interface import Vision
 
 import numpy as np
 
-class World(WorldInterface):
+class World(WorldInterface):             # Concrete implementation of WorldInterface
     def __init__(self, window: Window):
         self.agents = Agent(40)
         self.window = window
@@ -21,17 +21,17 @@ class World(WorldInterface):
         self.vision: Vision = Vision(self.grid)
         
     
-    def add_agent(self, agent: Agent):
+    def add_agent(self, agent: Agent):  # Add agents to world
         self.agents.append(agent)
     
-    def step(self):
+    def step(self):                     # Advance agents' states in world
         for agent in self.agents:
             agent.move()
     
-    def get_agents(self):
+    def get_agents(self):               # Return list of all agents currently in world
         return self.agents
     
-    def draw(self, surface: Surface):
+    def draw(self, surface: Surface):   # Draw current state of the world to given surface
 
         surface.fill((0, 0, 0))
 
@@ -75,16 +75,16 @@ class World(WorldInterface):
         pass
                     
     def populate_world(self, n_agents: int):
-        n_thiefs = int(n_agents * 0.3)
+        n_thiefs = int(n_agents * 0.3)                   # 30% thieves
         n_citizens = n_agents - n_thiefs
 
         agent_data = [
-            (Thief, n_thiefs ,np.array([255, 0, 0])),
-            (Citizen, n_citizens, np.array([0, 255, 0]))
+            (Thief, n_thiefs ,np.array([255, 0, 0])),    # Thieves are red
+            (Citizen, n_citizens, np.array([0, 255, 0])) # Citizens are green
         ]
         
         for agent_type, n, color in agent_data:
             for _ in range(n):
-                position =  self.window.window_size * np.random.rand(2) - self.window.window_size / 2
-                agent = agent_type(position, color)
-                self.add_agent(agent)
+                position =  self.window.window_size * np.random.rand(2) - self.window.window_size / 2   # In random position within window
+                agent = agent_type(position, color)                                                     # Create agent of agent_type
+                self.add_agent(agent)                                                                   # Add agent to world

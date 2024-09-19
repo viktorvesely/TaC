@@ -8,6 +8,7 @@ state = State()
 
 class Window:
 
+    # Define window size using numpy array [width, height]
     window_size: np.ndarray = np.array([1000, 600])
 
     def __init__(self):
@@ -17,10 +18,11 @@ class Window:
 
     def __enter__(self) -> Self:
 
-        pygame.init()
+        pygame.init()   # Initialize pygame modules 
         
+        # Create pygame window
         self.surface = pygame.display.set_mode(self.window_size)
-        self.running = True
+        self.running = True # Window now running
 
         return self
     
@@ -31,6 +33,7 @@ class Window:
             traceback: object | None
         ):
 
+        # Stop window and release resources before quitting
         self.running = False
         self.surface = None
 
@@ -40,6 +43,7 @@ class Window:
 
         state.keys_pressed.clear()
 
+        # Close window input
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False

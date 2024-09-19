@@ -20,16 +20,19 @@ class Animation[T]:
             raise StopIteration()
 
         try:
+            # Get next value from generator
             val = next(self.generator)
 
+            # If there is `on_animation` callback, invoke it with generated value 
             if callable(self.on_animation):
                 self.on_animation(val)
-            return val, True
-        except StopIteration:
+            return val, True # Return generated value and True to continue animation
 
+        except StopIteration:
+            # If generator exhauseted end animation
             if callable(self.on_finish):
                 self.on_finish()
 
             self.finished = True
-            return None, False
+            return None, False # Return None and False to indicate end of animation
 

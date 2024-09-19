@@ -8,7 +8,7 @@ from ..state import State
 
 state = State()
 
-class lerp(Animation[np.ndarray]):
+class lerp(Animation[np.ndarray]):  # Linear Interpolation animation class, transition between two numpy arrays over specified duration
 
     def __init__(
             self,
@@ -28,6 +28,6 @@ class lerp(Animation[np.ndarray]):
 
 
     def animator(self):
-
+        # Generate values for animation as long as 'v' (progress) <= 1 (end of animation)
         while (v := (state.t - self.start_t) / self.duration) <= 1.0:
             yield self.start + (self.end - self.start) * v

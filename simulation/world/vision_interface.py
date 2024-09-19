@@ -10,8 +10,9 @@ state = State()
 
 class Vision:
 
-    fov = np.pi / 3
-    vision_length = 160.0
+    # Attributes to define fov, vision lenght and number or rays
+    fov = np.pi / 3         # 60° FOV
+    vision_length = 160.0   # Max distance
     n_rays = 5
 
     def __init__(self, grid: Grid) -> None:
@@ -26,12 +27,14 @@ class Vision:
         top_left = camera.screenToWorld @ np.zeros(2)
         bottom_right = camera.screenToWorld @ state.window.window_size
 
+        # Get indices of walls in FOV
         left, right, top, bottom = self.grid.get_walls_inds_from_to(top_left, bottom_right)
         v, i = self.values[top:bottom, left:right], self.grid.grid_indicies[top:bottom, left:right]
 
         vision_mask = ~np.isclose(v, 0)
         vision_inds = np.where(vision_mask)
 
+        # Loop through visible cells and draw rectangles for them
         for local_i, local_j in zip(*vision_inds):
             world_pos = self.grid.cell_pos_to_world_pos(i[local_i, local_j])
             screen_pos = camera.worldToScreen @ world_pos
@@ -43,6 +46,7 @@ class Vision:
                 width=int(max(1, 3 * camera.zoom))
             )
 
+    # Method to manage drawing of vision maps based on keyboard input
     def draw(self, surface: Surface):
         
         keys = pygame.key.get_pressed()
@@ -50,6 +54,7 @@ class Vision:
         if not keys[pygame.K_d]:
             self.draw_vision_map(surface)
 
+    # Update vision field
     def tick(self):
         self.values = generate_vision_field(
             state.agent_position,
@@ -63,7 +68,7 @@ class Vision:
         )
 
     @classmethod
-    def generate_triangles(cls) -> np.ndarray:
+    def generate_triangles(cls) -> np.ndarray:  # Generate vision triangle for each agent
 
         pos = state.agent_position
 
@@ -87,7 +92,7 @@ class Vision:
         return triangles
     
     @classmethod
-    def in_triangle(cls, triangle: np.ndarray, points: np.ndarray) -> np.ndarray:
+    def in_triangle(cls, triangle: np.ndarray, points: np.ndarray) -> np.ndarray: # Check if points are inside of given triangle
         # https://stackoverflow.com/a/14382692/7020366
 
         p0, p1, p2 = triangle
@@ -96,6 +101,7 @@ class Vision:
         p1x, p1y = p1
         p2x, p2y = p2
 
+        # Calculate areas and return boolean mask indicating whether points are inside the triangle
         s = cls.in_triangle_formula_term * (p0y * p2x - p0x * p2y + (p2y - p0y) * px + (p0x - p2x) * py)
         t = cls.in_triangle_formula_term * (p0x * p1y - p0y * p1x + (p0y - p1y) * px + (p1x - p0x) * py)
 

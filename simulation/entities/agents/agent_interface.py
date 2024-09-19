@@ -7,13 +7,16 @@ from ..entity import Entity
 state = State()
 
 class AgentInterface(Entity):
-    
+    # Base class for agents in simulation, inherit Entity and add agent specific features
     def __init__(self, positon: ndarray) -> None:
-        super().__init__(positon)
+        super().__init__(positon) # Initialize agent's position
 
 
     def tick(self):
 
+        # Calculate agent's next position based on current position, velocity and tick
         state.agent_position = state.agent_position + state.agent_velocity * state.dTick
         
         return super().tick()
+
+

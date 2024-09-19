@@ -27,8 +27,8 @@ class Agent(AgentInterface):
         """
         super().tick()
 
-        state.agent_angle = state.agent_angle + (0.0001 * state.dTick) % (np.pi * 2)
-        state.agent_velocity = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T * self.max_speed
+        state.agent_angle = state.agent_angle + (0.0001 * state.dTick) % (np.pi * 2) # Calculate random angle for direction
+        state.agent_velocity = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T * self.max_speed # Set velocity to move agent
         
 
     def draw(self, surface: Surface):
@@ -39,5 +39,6 @@ class Agent(AgentInterface):
         projected = state.camera.worldToScreen.m @ additive.T
         projected = projected[:2, :].T
 
+        # Draw agent as circle at position
         for position in projected:
             pygame.draw.circle(surface, (255, 255, 255), position, 10 * state.camera.zoom)

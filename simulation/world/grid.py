@@ -6,21 +6,22 @@ from ..entities.entity import Entity
 from ..entities.agents.agent import Agent
 from ..state import State
 
-state = State()
+state = State() # Singleton for accessing state of game or simulation
 
-WPOS_TL = 0
-WPOS_MIDDLE = 1
+WPOS_TL = 0     # Top left placement
+WPOS_MIDDLE = 1 # Middle placement
 
-class Grid:
+class Grid:     # 2D grid world, handles spatial positioning, wall locations, and drawing of grid and walls
 
     def __init__(self, size: float = 40, n_grids: int = 30) -> None:
         
-        self.size = size
-        self._tomid: np.ndarray = np.ones(2) * (self.size / 2)
-        self.world_size = np.array([-size, size], dtype=np.float64) * n_grids
-        self.world_TL = np.array([-size, -size], dtype=np.float64) * n_grids
+        self.size = size # Cell size in grid
+        self._tomid: np.ndarray = np.ones(2) * (self.size / 2) # Offset to get cell center
+        self.world_size = np.array([-size, size], dtype=np.float64) * n_grids # World size
+        self.world_TL = np.array([-size, -size], dtype=np.float64) * n_grids  # Top left corner of world
         self.ngrids = n_grids * 2
 
+        # Randomly generate walls (1 wall, 0 empty cell)
         self.walls: np.ndarray = np.random.choice([1.0, 0.0], p=[0.1, 0.9], size=(self.ngrids, self.ngrids))
         self.grid_indicies = np.empty((self.ngrids, self.ngrids), dtype=object)    
         for i in range(self.ngrids):
@@ -29,11 +30,11 @@ class Grid:
 
     
 
-    def world_pos_to_cell_pos(self, pos: np.ndarray) -> tuple[int, int]:
+    def world_pos_to_cell_pos(self, pos: np.ndarray) -> tuple[int, int]: # World coordinates to grid cell coordinates conversion
         pos = pos - self.world_TL
         return int(pos[1] // self.size), int(pos[0] // self.size)
     
-    def cell_pos_to_world_pos(self, pos: tuple[int, int], placement: int = WPOS_TL) -> np.ndarray:
+    def cell_pos_to_world_pos(self, pos: tuple[int, int], placement: int = WPOS_TL) -> np.ndarray: # Grid cell position to world coordinates conversion
         out = np.array([pos[1], pos[0]]) * self.size + self.world_TL
 
         if placement == WPOS_MIDDLE:
@@ -41,7 +42,7 @@ class Grid:
         
         return out
     
-    def vectorized_world_to_cell(self, positions: np.ndarray) -> np.ndarray:
+    def vectorized_world_to_cell(self, positions: np.ndarray) -> np.ndarray: # Multiple world positions to grid cell positions
         """
         positions (n_entities, 2)
         """
@@ -49,7 +50,7 @@ class Grid:
         coords = (positions // self.size).astype(int)
         return np.flip(coords, axis=1)
 
-    def vectorized_cell_to_world(self, coords: np.ndarray, placement: int = WPOS_TL) -> np.ndarray:
+    def vectorized_cell_to_world(self, coords: np.ndarray, placement: int = WPOS_TL) -> np.ndarray: # Multiple grid cell positions to world positions
         out = (np.flip(coords, axis=1)).astype(float) * self.size + self.world_TL
 
         if placement == WPOS_MIDDLE:
@@ -57,10 +58,11 @@ class Grid:
         
         return out
 
-    def draw_grid(self, surface: Surface):
+    def draw_grid(self, surface: Surface): # Draw grid lines on surface using camera's view
         camera = state.camera
         w_min, w_max = self.world_size
 
+        # Get visible area in world coordinates
         top_left = camera.screenToWorld @ np.zeros(2)
         top_left = np.clip(top_left, w_min, w_max)
         bottom_right = camera.screenToWorld @ state.window.window_size
@@ -90,6 +92,7 @@ class Grid:
 
     def get_walls_inds_from_to(self, top_left: np.ndarray, bottom_right: np.ndarray) -> tuple[int, int, int, int]:
 
+        # Get indices of walls within rectangular area in the grid
         top, left = self.world_pos_to_cell_pos(top_left)
         bottom, right = self.world_pos_to_cell_pos(bottom_right)
 
@@ -108,6 +111,7 @@ class Grid:
 
     def draw_walls(self, surface: Surface):
         
+        # Draw walls on surface based on camera view
         camera = state.camera
         top_left = camera.screenToWorld @ np.zeros(2)
         bottom_right = camera.screenToWorld @ state.window.window_size
@@ -136,7 +140,7 @@ class Grid:
         return np.array(positions)
     
     @classmethod
-    def inject_ent_pos(cls, ents: list[Entity], positions: np.ndarray):
+    def inject_ent_pos(cls, ents: list[Entity], positions: np.ndarray): # Update positions of all entities
         for i, ent in enumerate(ents):
             ent.position = positions[i, :]
 
