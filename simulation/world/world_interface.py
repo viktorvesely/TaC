@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class WorldInterface(ABC):
+class WorldInterface(ABC): # Abstract base class for world simulation
     @abstractmethod
     def add_agent(self, agent):
         "add an agent to the world"

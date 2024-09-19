@@ -14,6 +14,7 @@ class Citizen(Agent):
         self.color = np.array([0, 255, 0])
         
     def behaviour(self):
+        # Define citizen's behavior
         print("I am a citizen")
         
     def draw(self, surface: Surface):

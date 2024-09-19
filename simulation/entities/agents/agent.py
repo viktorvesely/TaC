@@ -50,5 +50,6 @@ class Agent(AgentInterface):
         projected = state.camera.worldToScreen.m @ additive.T
         projected = projected[:2, :].T
 
+        # Draw agent as circle at position
         for position in projected:
             pygame.draw.circle(surface, (255, 255, 255), position, 10 * state.camera.zoom)

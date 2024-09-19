@@ -15,6 +15,7 @@ class Thief(Agent):
         self.color = np.array([255, 0, 0])
         
     def behaviour(self):
+        # Thief specific behavior
         print("I am a thief")
 
     def draw(self, surface: Surface):
