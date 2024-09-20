@@ -2,6 +2,7 @@ from typing import Callable
 from pygame import Surface
 import pygame
 import numpy as np
+import random
 
 from .agent_interface import AgentInterface
 from .agent_actions import AgentActions
@@ -16,16 +17,18 @@ class Agent(AgentInterface):
         super().__init__(None)
         
         state.agent_position = (np.random.random((n, 2)) -  0.5) * 300
-        self.max_speed = 0.1
         self.n = n
         state.agent_velocity = np.zeros((n, 2))
         state.agent_angle = np.random.random(n) * np.pi * 2
-
+        state.n_agents = n
+        state.agent_colors = np.zeros((n, 3), dtype=np.int32)
+        state.agent_colors[:, :] = 255
+        state.agent_speed = np.full((n, 1), 0.1)
         self.actions: list[Callable[[int], Callable]] = [AgentActions.select_action for _ in range(n)]
 
 
-    def look_random(self, i_agent: int):
-        state.agent_angle[i_agent] = state.agent_angle[i_agent] + (0.0008 * state.dTick) % (np.pi * 2)
+    def look_random(self, i_agent: int, multiplier: float):
+        state.agent_angle[i_agent] = state.agent_angle[i_agent] + (0.0008 * multiplier * state.dTick) % (np.pi * 2)
 
     def tick(self):
         """
@@ -34,11 +37,12 @@ class Agent(AgentInterface):
         
         super().tick()
 
+        
         for i, action in enumerate(self.actions):
             nex_action = action(i)
             self.actions[i] = nex_action
         # 
-        state.agent_velocity = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T * self.max_speed
+        state.agent_velocity = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T * state.agent_speed
         
 
     def draw(self, surface: Surface):
@@ -50,5 +54,5 @@ class Agent(AgentInterface):
         projected = projected[:2, :].T
 
         # Draw agent as circle at position
-        for position in projected:
-            pygame.draw.circle(surface, (255, 255, 255), position, 10 * state.camera.zoom)
+        for i_agent, position in enumerate(projected):
+            pygame.draw.circle(surface, state.agent_colors[i_agent, :], position, 10 * state.camera.zoom)

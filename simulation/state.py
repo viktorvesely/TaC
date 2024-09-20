@@ -25,6 +25,7 @@ class State(metaclass=Singleton):
         self.events: list[Event] = []
         self.window: Window | None = None
 
+        self.n_agents: int = -1
         self.t: int = 0
         self.last_draw: int = 0
         self.last_tick: int = 0
@@ -42,4 +43,6 @@ class State(metaclass=Singleton):
         self.agent_velocity: np.ndarray = None
         self.agent_angle: np.ndarray = None
         self.agent_coords: np.ndarray = None
-
+        self.agents_in_vision: np.ndarray = None
+        self.agent_colors: np.ndarray = None
+        self.agent_speed: np.ndarray = None

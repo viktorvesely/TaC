@@ -28,9 +28,9 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
             for j in range(self.ngrids):
                 self.grid_indicies[i, j] = (i, j)
 
-        self.density: np.ndarray = np.zeros_like(self.walls)
-        
-
+        self.density: np.ndarray = np.zeros_like(self.walls, dtype=np.int32)
+        self.offsets: np.ndarray = np.zeros_like(self.walls, dtype=np.int32)
+        self.homogenous_indicies: np.ndarray | None = None 
 
     
 
@@ -154,9 +154,6 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
         ent_pos = state.agent_position
         n_ents = ent_pos.shape[0]
 
-        # Collision with map bound
-        ent_pos = np.clip(ent_pos, *(self.world_size + np.array([1, -1])))
-
         # Extract cell info given particle
         cell_inds = self.vectorized_world_to_cell(ent_pos)
         cell_pos = self.vectorized_cell_to_world(cell_inds, placement=WPOS_MIDDLE)
@@ -191,19 +188,28 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
 
         # Resolve the collision using the collision point
         ent_pos[collide_mask] = collision_closest_points
+        state.agent_position = ent_pos
 
-        state.agent_position = ent_pos  #self.inject_ent_pos(collider_entities, ent_pos)
+    def register_agent_coords(self):
 
-    def calculate_density(self):
-        agent_coords = self.vectorized_world_to_cell(state.agent_position)
+        agent_coords = state.agent_coords
         i, j = agent_coords.T
-        self.density = np.zeros((self.ngrids, self.ngrids))
+        self.density = np.zeros((self.ngrids, self.ngrids), dtype=np.int32)
         np.add.at(self.density, (i, j), 1.0)
+
+        self.offsets = np.cumsum(
+            np.pad(self.density.flatten(), (1, 0))
+        )[:-1].reshape(self.density.shape)
+
+        self.homogenous_indicies = np.lexsort((agent_coords[:, 1], agent_coords[:, 0])).astype(np.int32)
+
     
     def tick(self):
 
         self.handle_wall_collision()
-        self.calculate_density()
+        state.agent_position = np.clip(state.agent_position, *(self.world_size + np.array([10, -10])))
+
+        self.register_agent_coords()
         
             
 

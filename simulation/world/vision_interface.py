@@ -19,6 +19,7 @@ class Vision:
         
         self.grid = grid
         self.values = np.zeros_like(self.grid.walls)
+        self.max_targets_per_agent: int = 5
 
 
     def draw_vision_map(self, surface: Surface):
@@ -57,11 +58,15 @@ class Vision:
 
     # Update vision field
     def tick(self):
+        state.agents_in_vision = np.full((state.n_agents, self.max_targets_per_agent), -1, dtype=np.int32)
         self.values = generate_vision_field(
             state.agent_position,
             state.agent_angle,
             self.grid.walls,
             self.grid.density,
+            self.grid.offsets,
+            self.grid.homogenous_indicies,
+            state.agents_in_vision,
             self.grid.world_TL,
             self.grid.size,
             self.vision_length,

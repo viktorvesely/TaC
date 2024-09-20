@@ -11,7 +11,7 @@ class PointsOfInterests:
     def __init__(self, grid: Grid) -> None:
         
         self.grid: Grid = grid
-        self.coords = np.empty((0, 2), dtype=int)
+        self.coords = np.empty((0, 2), dtype=np.int32)
         
 
     def add_random(self, N: int = 1):

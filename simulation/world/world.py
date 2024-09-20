@@ -15,7 +15,7 @@ import numpy as np
 class World(WorldInterface):             # Concrete implementation of WorldInterface
     def __init__(self, window: Window):
         
-        n_agents = 1
+        n_agents = 250
         self.window = window
         self.agents = Agent(n_agents)
         self.grid: Grid = Grid(n_grids=20)

@@ -82,6 +82,7 @@ class GoogleMaps:
         
 
     def navigate(self, start: tuple[int, int], goal: tuple[int, int]) -> list:
+        # TODO fix navigation it is slow as hell
         """Perform the A* algorithm with a given grid, start and goal positions."""
         walls = self.grid.walls
         
