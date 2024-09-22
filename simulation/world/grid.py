@@ -199,7 +199,7 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
 
         self.offsets = np.cumsum(
             np.pad(self.density.flatten(), (1, 0))
-        )[:-1].reshape(self.density.shape)
+        )[:-1].reshape(self.density.shape).astype(np.int32)
 
         self.homogenous_indicies = np.lexsort((agent_coords[:, 1], agent_coords[:, 0])).astype(np.int32)
 
