@@ -75,7 +75,7 @@ cdef inline void cast_ray_filling(
     last_coords.i = -150
     last_coords.j = -237
     cdef int i_step
-    cdef double vision_strength = 1.0;
+    cdef double vision_strength = 0.4;
     cdef double vision_falloff = (vision_strength - 0.1) / (<double>n_steps)
     cdef double vision_reduction
     cdef double wall_value
@@ -133,6 +133,7 @@ cdef inline void cast_ray_filling(
                 if random() > vision_strength:
                     continue
 
+                # TODO target_i can be added twice (when two rays intersect the same cell)
                 agents_in_vision[current_agents_in_vision[0]] = target_i
                 current_agents_in_vision[0] += 1
         

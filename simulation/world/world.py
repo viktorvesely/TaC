@@ -9,16 +9,19 @@ from .grid import Grid
 from .vision_interface import Vision
 from .poi import PointsOfInterests
 from .navigation import GoogleMaps
+from .generation import WorldGenerator
 
 import numpy as np
 
 class World(WorldInterface):             # Concrete implementation of WorldInterface
     def __init__(self, window: Window):
         
-        n_agents = 250
+        n_agents = 300
+        n_grids = 66
+        self.generator = WorldGenerator(n_grids)
         self.window = window
         self.agents = Agent(n_agents)
-        self.grid: Grid = Grid(n_grids=20)
+        self.grid: Grid = Grid(self.generator.generate_walls())
         self.vision: Vision = Vision(self.grid)
         self.pois = PointsOfInterests(self.grid)
         self.pois.add_random(5)

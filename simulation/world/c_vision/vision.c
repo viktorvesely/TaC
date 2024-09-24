@@ -19660,22 +19660,22 @@ static CYTHON_INLINE void __pyx_f_6vision_cast_ray_filling(double __pyx_v_ray_an
  *     last_coords.i = -150
  *     last_coords.j = -237             # <<<<<<<<<<<<<<
  *     cdef int i_step
- *     cdef double vision_strength = 1.0;
+ *     cdef double vision_strength = 0.4;
  */
   __pyx_v_last_coords.j = -237;
 
   /* "vision.pyx":78
  *     last_coords.j = -237
  *     cdef int i_step
- *     cdef double vision_strength = 1.0;             # <<<<<<<<<<<<<<
+ *     cdef double vision_strength = 0.4;             # <<<<<<<<<<<<<<
  *     cdef double vision_falloff = (vision_strength - 0.1) / (<double>n_steps)
  *     cdef double vision_reduction
  */
-  __pyx_v_vision_strength = 1.0;
+  __pyx_v_vision_strength = 0.4;
 
   /* "vision.pyx":79
  *     cdef int i_step
- *     cdef double vision_strength = 1.0;
+ *     cdef double vision_strength = 0.4;
  *     cdef double vision_falloff = (vision_strength - 0.1) / (<double>n_steps)             # <<<<<<<<<<<<<<
  *     cdef double vision_reduction
  *     cdef double wall_value
@@ -20105,7 +20105,7 @@ static CYTHON_INLINE void __pyx_f_6vision_cast_ray_filling(double __pyx_v_ray_an
  *                 if random() > vision_strength:
  *                     continue             # <<<<<<<<<<<<<<
  * 
- *                 agents_in_vision[current_agents_in_vision[0]] = target_i
+ *                 # TODO target_i can be added twice (when two rays intersect the same cell)
  */
           goto __pyx_L16_continue;
 
@@ -20118,9 +20118,9 @@ static CYTHON_INLINE void __pyx_f_6vision_cast_ray_filling(double __pyx_v_ray_an
  */
         }
 
-        /* "vision.pyx":136
- *                     continue
+        /* "vision.pyx":137
  * 
+ *                 # TODO target_i can be added twice (when two rays intersect the same cell)
  *                 agents_in_vision[current_agents_in_vision[0]] = target_i             # <<<<<<<<<<<<<<
  *                 current_agents_in_vision[0] += 1
  * 
@@ -20133,12 +20133,12 @@ static CYTHON_INLINE void __pyx_f_6vision_cast_ray_filling(double __pyx_v_ray_an
         } else if (unlikely(__pyx_t_8 >= __pyx_v_agents_in_vision.shape[0])) __pyx_t_12 = 0;
         if (unlikely(__pyx_t_12 != -1)) {
           __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_12);
-          __PYX_ERR(0, 136, __pyx_L1_error)
+          __PYX_ERR(0, 137, __pyx_L1_error)
         }
         *((int *) ( /* dim=0 */ (__pyx_v_agents_in_vision.data + __pyx_t_8 * __pyx_v_agents_in_vision.strides[0]) )) = __pyx_v_target_i;
 
-        /* "vision.pyx":137
- * 
+        /* "vision.pyx":138
+ *                 # TODO target_i can be added twice (when two rays intersect the same cell)
  *                 agents_in_vision[current_agents_in_vision[0]] = target_i
  *                 current_agents_in_vision[0] += 1             # <<<<<<<<<<<<<<
  * 
@@ -20159,7 +20159,7 @@ static CYTHON_INLINE void __pyx_f_6vision_cast_ray_filling(double __pyx_v_ray_an
  */
     }
 
-    /* "vision.pyx":141
+    /* "vision.pyx":142
  * 
  *         # Apply vision falloff
  *         vision_strength -= vision_falloff             # <<<<<<<<<<<<<<
@@ -20168,7 +20168,7 @@ static CYTHON_INLINE void __pyx_f_6vision_cast_ray_filling(double __pyx_v_ray_an
  */
     __pyx_v_vision_strength = (__pyx_v_vision_strength - __pyx_v_vision_falloff);
 
-    /* "vision.pyx":142
+    /* "vision.pyx":143
  *         # Apply vision falloff
  *         vision_strength -= vision_falloff
  *         vision_strength = max(0.0, vision_strength)             # <<<<<<<<<<<<<<
@@ -20209,7 +20209,7 @@ static CYTHON_INLINE void __pyx_f_6vision_cast_ray_filling(double __pyx_v_ray_an
   __pyx_L0:;
 }
 
-/* "vision.pyx":147
+/* "vision.pyx":148
  * 
  * 
  * cdef void _generate_vision_field(             # <<<<<<<<<<<<<<
@@ -20250,7 +20250,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
   #endif
   __Pyx_RefNannySetupContext("_generate_vision_field", 1);
 
-  /* "vision.pyx":166
+  /* "vision.pyx":167
  *     int j_tot
  * ) noexcept nogil:
  *     cdef double step_size = grid_size / 2.0             # <<<<<<<<<<<<<<
@@ -20259,7 +20259,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
  */
   __pyx_v_step_size = (__pyx_v_grid_size / 2.0);
 
-  /* "vision.pyx":167
+  /* "vision.pyx":168
  * ) noexcept nogil:
  *     cdef double step_size = grid_size / 2.0
  *     cdef int n_steps = <int> (vision_length / step_size)             # <<<<<<<<<<<<<<
@@ -20274,11 +20274,11 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
     #ifdef WITH_THREAD
     __Pyx_PyGILState_Release(__pyx_gilstate_save);
     #endif
-    __PYX_ERR(0, 167, __pyx_L1_error)
+    __PYX_ERR(0, 168, __pyx_L1_error)
   }
   __pyx_v_n_steps = ((int)(__pyx_v_vision_length / __pyx_v_step_size));
 
-  /* "vision.pyx":168
+  /* "vision.pyx":169
  *     cdef double step_size = grid_size / 2.0
  *     cdef int n_steps = <int> (vision_length / step_size)
  *     cdef double fov_step = fov / (<double>(n_rays - 1))             # <<<<<<<<<<<<<<
@@ -20294,11 +20294,11 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
     #ifdef WITH_THREAD
     __Pyx_PyGILState_Release(__pyx_gilstate_save);
     #endif
-    __PYX_ERR(0, 168, __pyx_L1_error)
+    __PYX_ERR(0, 169, __pyx_L1_error)
   }
   __pyx_v_fov_step = (__pyx_v_fov / __pyx_t_1);
 
-  /* "vision.pyx":170
+  /* "vision.pyx":171
  *     cdef double fov_step = fov / (<double>(n_rays - 1))
  * 
  *     cdef int n_agents = agent_position.shape[0]             # <<<<<<<<<<<<<<
@@ -20307,7 +20307,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
  */
   __pyx_v_n_agents = (__pyx_v_agent_position.shape[0]);
 
-  /* "vision.pyx":178
+  /* "vision.pyx":179
  *     cdef int i_agent, i_ray
  * 
  *     for i_agent in prange(n_agents, nogil=True):             # <<<<<<<<<<<<<<
@@ -20371,7 +20371,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
                             __pyx_v_i_ray = ((int)0xbad0bad0);
                             __pyx_v_ray_angle = ((double)__PYX_NAN());
 
-                            /* "vision.pyx":180
+                            /* "vision.pyx":181
  *     for i_agent in prange(n_agents, nogil=True):
  * 
  *         agent_x = agent_position[i_agent, 0]             # <<<<<<<<<<<<<<
@@ -20391,11 +20391,11 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
                             } else if (unlikely(__pyx_t_6 >= __pyx_v_agent_position.shape[1])) __pyx_t_7 = 1;
                             if (unlikely(__pyx_t_7 != -1)) {
                               __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_7);
-                              __PYX_ERR(0, 180, __pyx_L8_error)
+                              __PYX_ERR(0, 181, __pyx_L8_error)
                             }
                             __pyx_v_agent_x = (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_agent_position.data + __pyx_t_5 * __pyx_v_agent_position.strides[0]) ) + __pyx_t_6 * __pyx_v_agent_position.strides[1]) )));
 
-                            /* "vision.pyx":181
+                            /* "vision.pyx":182
  * 
  *         agent_x = agent_position[i_agent, 0]
  *         agent_y = agent_position[i_agent, 1]             # <<<<<<<<<<<<<<
@@ -20415,11 +20415,11 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
                             } else if (unlikely(__pyx_t_5 >= __pyx_v_agent_position.shape[1])) __pyx_t_7 = 1;
                             if (unlikely(__pyx_t_7 != -1)) {
                               __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_7);
-                              __PYX_ERR(0, 181, __pyx_L8_error)
+                              __PYX_ERR(0, 182, __pyx_L8_error)
                             }
                             __pyx_v_agent_y = (*((double *) ( /* dim=1 */ (( /* dim=0 */ (__pyx_v_agent_position.data + __pyx_t_6 * __pyx_v_agent_position.strides[0]) ) + __pyx_t_5 * __pyx_v_agent_position.strides[1]) )));
 
-                            /* "vision.pyx":182
+                            /* "vision.pyx":183
  *         agent_x = agent_position[i_agent, 0]
  *         agent_y = agent_position[i_agent, 1]
  *         agent_angle = agent_angles[i_agent]             # <<<<<<<<<<<<<<
@@ -20434,11 +20434,11 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
                             } else if (unlikely(__pyx_t_5 >= __pyx_v_agent_angles.shape[0])) __pyx_t_7 = 0;
                             if (unlikely(__pyx_t_7 != -1)) {
                               __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_7);
-                              __PYX_ERR(0, 182, __pyx_L8_error)
+                              __PYX_ERR(0, 183, __pyx_L8_error)
                             }
                             __pyx_v_agent_angle = (*((double *) ( /* dim=0 */ (__pyx_v_agent_angles.data + __pyx_t_5 * __pyx_v_agent_angles.strides[0]) )));
 
-                            /* "vision.pyx":184
+                            /* "vision.pyx":185
  *         agent_angle = agent_angles[i_agent]
  * 
  *         for i_ray in range(n_rays):             # <<<<<<<<<<<<<<
@@ -20450,7 +20450,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
                             for (__pyx_t_9 = 0; __pyx_t_9 < __pyx_t_8; __pyx_t_9+=1) {
                               __pyx_v_i_ray = __pyx_t_9;
 
-                              /* "vision.pyx":186
+                              /* "vision.pyx":187
  *         for i_ray in range(n_rays):
  * 
  *             if i_ray % 2 == 0:             # <<<<<<<<<<<<<<
@@ -20460,7 +20460,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
                               __pyx_t_10 = (__Pyx_mod_long(__pyx_v_i_ray, 2) == 0);
                               if (__pyx_t_10) {
 
-                                /* "vision.pyx":187
+                                /* "vision.pyx":188
  * 
  *             if i_ray % 2 == 0:
  *                 diverger = -(<double>(i_ray)) / 2             # <<<<<<<<<<<<<<
@@ -20469,7 +20469,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
  */
                                 __pyx_v_diverger = ((-((double)__pyx_v_i_ray)) / 2.0);
 
-                                /* "vision.pyx":186
+                                /* "vision.pyx":187
  *         for i_ray in range(n_rays):
  * 
  *             if i_ray % 2 == 0:             # <<<<<<<<<<<<<<
@@ -20479,7 +20479,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
                                 goto __pyx_L12;
                               }
 
-                              /* "vision.pyx":189
+                              /* "vision.pyx":190
  *                 diverger = -(<double>(i_ray)) / 2
  *             else:
  *                 diverger = (<double>i_ray)             # <<<<<<<<<<<<<<
@@ -20491,7 +20491,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
                               }
                               __pyx_L12:;
 
-                              /* "vision.pyx":191
+                              /* "vision.pyx":192
  *                 diverger = (<double>i_ray)
  * 
  *             ray_angle = agent_angle + fov_step * diverger             # <<<<<<<<<<<<<<
@@ -20500,7 +20500,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
  */
                               __pyx_v_ray_angle = (__pyx_v_agent_angle + (__pyx_v_fov_step * __pyx_v_diverger));
 
-                              /* "vision.pyx":204
+                              /* "vision.pyx":205
  *                 offsets,
  *                 agent_indicies,
  *                 agents_in_vision[i_agent, :],             # <<<<<<<<<<<<<<
@@ -20525,7 +20525,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
                 #ifdef WITH_THREAD
                 PyGILState_Release(__pyx_gilstate_save);
                 #endif
-            __PYX_ERR(0, 204, __pyx_L8_error)
+            __PYX_ERR(0, 205, __pyx_L8_error)
         }
         __pyx_t_11.data += __pyx_tmp_idx * __pyx_tmp_stride;
 }
@@ -20536,7 +20536,7 @@ __pyx_t_11.strides[0] = __pyx_v_agents_in_vision.strides[1];
 
 __pyx_t_5 = __pyx_v_i_agent;
 
-                              /* "vision.pyx":205
+                              /* "vision.pyx":206
  *                 agent_indicies,
  *                 agents_in_vision[i_agent, :],
  *                 &current_agents_in_vision[i_agent],             # <<<<<<<<<<<<<<
@@ -20550,10 +20550,10 @@ __pyx_t_5 = __pyx_v_i_agent;
                               } else if (unlikely(__pyx_t_5 >= __pyx_v_current_agents_in_vision.shape[0])) __pyx_t_12 = 0;
                               if (unlikely(__pyx_t_12 != -1)) {
                                 __Pyx_RaiseBufferIndexErrorNogil(__pyx_t_12);
-                                __PYX_ERR(0, 205, __pyx_L8_error)
+                                __PYX_ERR(0, 206, __pyx_L8_error)
                               }
 
-                              /* "vision.pyx":193
+                              /* "vision.pyx":194
  *             ray_angle = agent_angle + fov_step * diverger
  * 
  *             cast_ray_filling(             # <<<<<<<<<<<<<<
@@ -20659,7 +20659,7 @@ __pyx_t_5 = __pyx_v_i_agent;
         #endif
       }
 
-      /* "vision.pyx":178
+      /* "vision.pyx":179
  *     cdef int i_agent, i_ray
  * 
  *     for i_agent in prange(n_agents, nogil=True):             # <<<<<<<<<<<<<<
@@ -20689,7 +20689,7 @@ __pyx_t_5 = __pyx_v_i_agent;
       }
   }
 
-  /* "vision.pyx":147
+  /* "vision.pyx":148
  * 
  * 
  * cdef void _generate_vision_field(             # <<<<<<<<<<<<<<
@@ -20712,7 +20712,7 @@ __pyx_t_5 = __pyx_v_i_agent;
   __Pyx_RefNannyFinishContextNogil()
 }
 
-/* "vision.pyx":214
+/* "vision.pyx":215
  *             )
  * 
  * def generate_vision_field(             # <<<<<<<<<<<<<<
@@ -20806,7 +20806,7 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[0]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else goto __pyx_L5_argtuple_error;
         CYTHON_FALLTHROUGH;
         case  1:
@@ -20814,9 +20814,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[1]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 1); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 1); __PYX_ERR(0, 215, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
@@ -20824,9 +20824,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[2]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 2); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 2); __PYX_ERR(0, 215, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -20834,9 +20834,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[3]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 3); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 3); __PYX_ERR(0, 215, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -20844,9 +20844,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[4]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 4); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 4); __PYX_ERR(0, 215, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
@@ -20854,9 +20854,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[5]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 5); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 5); __PYX_ERR(0, 215, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
@@ -20864,9 +20864,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[6]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 6); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 6); __PYX_ERR(0, 215, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  7:
@@ -20874,9 +20874,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[7]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 7); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 7); __PYX_ERR(0, 215, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  8:
@@ -20884,9 +20884,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[8]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 8); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 8); __PYX_ERR(0, 215, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  9:
@@ -20894,9 +20894,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[9]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 9); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 9); __PYX_ERR(0, 215, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case 10:
@@ -20904,9 +20904,9 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[10]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 10); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 10); __PYX_ERR(0, 215, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case 11:
@@ -20914,14 +20914,14 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
           (void)__Pyx_Arg_NewRef_FASTCALL(values[11]);
           kw_args--;
         }
-        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 214, __pyx_L3_error)
+        else if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 215, __pyx_L3_error)
         else {
-          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 11); __PYX_ERR(0, 214, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, 11); __PYX_ERR(0, 215, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         const Py_ssize_t kwd_pos_args = __pyx_nargs;
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "generate_vision_field") < 0)) __PYX_ERR(0, 214, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_kwvalues, __pyx_pyargnames, 0, values + 0, kwd_pos_args, "generate_vision_field") < 0)) __PYX_ERR(0, 215, __pyx_L3_error)
       }
     } else if (unlikely(__pyx_nargs != 12)) {
       goto __pyx_L5_argtuple_error;
@@ -20939,22 +20939,22 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
       values[10] = __Pyx_Arg_FASTCALL(__pyx_args, 10);
       values[11] = __Pyx_Arg_FASTCALL(__pyx_args, 11);
     }
-    __pyx_v_agent_position = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_agent_position.memview)) __PYX_ERR(0, 215, __pyx_L3_error)
-    __pyx_v_agent_angles = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_agent_angles.memview)) __PYX_ERR(0, 216, __pyx_L3_error)
-    __pyx_v_walls = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_walls.memview)) __PYX_ERR(0, 217, __pyx_L3_error)
-    __pyx_v_density = __Pyx_PyObject_to_MemoryviewSlice_dsds_int(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_density.memview)) __PYX_ERR(0, 218, __pyx_L3_error)
-    __pyx_v_offsets = __Pyx_PyObject_to_MemoryviewSlice_dsds_int(values[4], PyBUF_WRITABLE); if (unlikely(!__pyx_v_offsets.memview)) __PYX_ERR(0, 219, __pyx_L3_error)
-    __pyx_v_agent_indicies = __Pyx_PyObject_to_MemoryviewSlice_ds_int(values[5], PyBUF_WRITABLE); if (unlikely(!__pyx_v_agent_indicies.memview)) __PYX_ERR(0, 220, __pyx_L3_error)
-    __pyx_v_agents_in_vision = __Pyx_PyObject_to_MemoryviewSlice_dsds_int(values[6], PyBUF_WRITABLE); if (unlikely(!__pyx_v_agents_in_vision.memview)) __PYX_ERR(0, 221, __pyx_L3_error)
-    __pyx_v_world_TL = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[7], PyBUF_WRITABLE); if (unlikely(!__pyx_v_world_TL.memview)) __PYX_ERR(0, 222, __pyx_L3_error)
-    __pyx_v_grid_size = __pyx_PyFloat_AsDouble(values[8]); if (unlikely((__pyx_v_grid_size == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 223, __pyx_L3_error)
-    __pyx_v_vision_length = __pyx_PyFloat_AsDouble(values[9]); if (unlikely((__pyx_v_vision_length == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 224, __pyx_L3_error)
-    __pyx_v_fov = __pyx_PyFloat_AsDouble(values[10]); if (unlikely((__pyx_v_fov == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 225, __pyx_L3_error)
-    __pyx_v_n_rays = __Pyx_PyInt_As_int(values[11]); if (unlikely((__pyx_v_n_rays == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 226, __pyx_L3_error)
+    __pyx_v_agent_position = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_agent_position.memview)) __PYX_ERR(0, 216, __pyx_L3_error)
+    __pyx_v_agent_angles = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_agent_angles.memview)) __PYX_ERR(0, 217, __pyx_L3_error)
+    __pyx_v_walls = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_walls.memview)) __PYX_ERR(0, 218, __pyx_L3_error)
+    __pyx_v_density = __Pyx_PyObject_to_MemoryviewSlice_dsds_int(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_density.memview)) __PYX_ERR(0, 219, __pyx_L3_error)
+    __pyx_v_offsets = __Pyx_PyObject_to_MemoryviewSlice_dsds_int(values[4], PyBUF_WRITABLE); if (unlikely(!__pyx_v_offsets.memview)) __PYX_ERR(0, 220, __pyx_L3_error)
+    __pyx_v_agent_indicies = __Pyx_PyObject_to_MemoryviewSlice_ds_int(values[5], PyBUF_WRITABLE); if (unlikely(!__pyx_v_agent_indicies.memview)) __PYX_ERR(0, 221, __pyx_L3_error)
+    __pyx_v_agents_in_vision = __Pyx_PyObject_to_MemoryviewSlice_dsds_int(values[6], PyBUF_WRITABLE); if (unlikely(!__pyx_v_agents_in_vision.memview)) __PYX_ERR(0, 222, __pyx_L3_error)
+    __pyx_v_world_TL = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[7], PyBUF_WRITABLE); if (unlikely(!__pyx_v_world_TL.memview)) __PYX_ERR(0, 223, __pyx_L3_error)
+    __pyx_v_grid_size = __pyx_PyFloat_AsDouble(values[8]); if (unlikely((__pyx_v_grid_size == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 224, __pyx_L3_error)
+    __pyx_v_vision_length = __pyx_PyFloat_AsDouble(values[9]); if (unlikely((__pyx_v_vision_length == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 225, __pyx_L3_error)
+    __pyx_v_fov = __pyx_PyFloat_AsDouble(values[10]); if (unlikely((__pyx_v_fov == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 226, __pyx_L3_error)
+    __pyx_v_n_rays = __Pyx_PyInt_As_int(values[11]); if (unlikely((__pyx_v_n_rays == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 227, __pyx_L3_error)
   }
   goto __pyx_L6_skip;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, __pyx_nargs); __PYX_ERR(0, 214, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("generate_vision_field", 1, 12, 12, __pyx_nargs); __PYX_ERR(0, 215, __pyx_L3_error)
   __pyx_L6_skip:;
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -20977,25 +20977,25 @@ PyObject *__pyx_args, PyObject *__pyx_kwds
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(((PyObject *)__pyx_v_agent_position.memview) == Py_None)) {
-    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "agent_position"); __PYX_ERR(0, 215, __pyx_L1_error)
+    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "agent_position"); __PYX_ERR(0, 216, __pyx_L1_error)
   }
   if (unlikely(((PyObject *)__pyx_v_agent_angles.memview) == Py_None)) {
-    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "agent_angles"); __PYX_ERR(0, 216, __pyx_L1_error)
+    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "agent_angles"); __PYX_ERR(0, 217, __pyx_L1_error)
   }
   if (unlikely(((PyObject *)__pyx_v_walls.memview) == Py_None)) {
-    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "walls"); __PYX_ERR(0, 217, __pyx_L1_error)
+    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "walls"); __PYX_ERR(0, 218, __pyx_L1_error)
   }
   if (unlikely(((PyObject *)__pyx_v_density.memview) == Py_None)) {
-    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "density"); __PYX_ERR(0, 218, __pyx_L1_error)
+    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "density"); __PYX_ERR(0, 219, __pyx_L1_error)
   }
   if (unlikely(((PyObject *)__pyx_v_offsets.memview) == Py_None)) {
-    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "offsets"); __PYX_ERR(0, 219, __pyx_L1_error)
+    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "offsets"); __PYX_ERR(0, 220, __pyx_L1_error)
   }
   if (unlikely(((PyObject *)__pyx_v_agent_indicies.memview) == Py_None)) {
-    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "agent_indicies"); __PYX_ERR(0, 220, __pyx_L1_error)
+    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "agent_indicies"); __PYX_ERR(0, 221, __pyx_L1_error)
   }
   if (unlikely(((PyObject *)__pyx_v_agents_in_vision.memview) == Py_None)) {
-    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "agents_in_vision"); __PYX_ERR(0, 221, __pyx_L1_error)
+    PyErr_Format(PyExc_TypeError, "Argument '%.200s' must not be None", "agents_in_vision"); __PYX_ERR(0, 222, __pyx_L1_error)
   }
   __pyx_r = __pyx_pf_6vision_generate_vision_field(__pyx_self, __pyx_v_agent_position, __pyx_v_agent_angles, __pyx_v_walls, __pyx_v_density, __pyx_v_offsets, __pyx_v_agent_indicies, __pyx_v_agents_in_vision, __pyx_v_world_TL, __pyx_v_grid_size, __pyx_v_vision_length, __pyx_v_fov, __pyx_v_n_rays);
 
@@ -21045,7 +21045,7 @@ static PyObject *__pyx_pf_6vision_generate_vision_field(CYTHON_UNUSED PyObject *
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("generate_vision_field", 1);
 
-  /* "vision.pyx":229
+  /* "vision.pyx":230
  *     ):
  * 
  *     cdef int i_tot = walls.shape[0]             # <<<<<<<<<<<<<<
@@ -21054,7 +21054,7 @@ static PyObject *__pyx_pf_6vision_generate_vision_field(CYTHON_UNUSED PyObject *
  */
   __pyx_v_i_tot = (__pyx_v_walls.shape[0]);
 
-  /* "vision.pyx":230
+  /* "vision.pyx":231
  * 
  *     cdef int i_tot = walls.shape[0]
  *     cdef int j_tot = walls.shape[1]             # <<<<<<<<<<<<<<
@@ -21063,7 +21063,7 @@ static PyObject *__pyx_pf_6vision_generate_vision_field(CYTHON_UNUSED PyObject *
  */
   __pyx_v_j_tot = (__pyx_v_walls.shape[1]);
 
-  /* "vision.pyx":231
+  /* "vision.pyx":232
  *     cdef int i_tot = walls.shape[0]
  *     cdef int j_tot = walls.shape[1]
  *     cdef int n_agents = agent_position.shape[0]             # <<<<<<<<<<<<<<
@@ -21072,7 +21072,7 @@ static PyObject *__pyx_pf_6vision_generate_vision_field(CYTHON_UNUSED PyObject *
  */
   __pyx_v_n_agents = (__pyx_v_agent_position.shape[0]);
 
-  /* "vision.pyx":232
+  /* "vision.pyx":233
  *     cdef int j_tot = walls.shape[1]
  *     cdef int n_agents = agent_position.shape[0]
  *     cdef int max_agents_in_vision = agents_in_vision.shape[1]             # <<<<<<<<<<<<<<
@@ -21081,45 +21081,45 @@ static PyObject *__pyx_pf_6vision_generate_vision_field(CYTHON_UNUSED PyObject *
  */
   __pyx_v_max_agents_in_vision = (__pyx_v_agents_in_vision.shape[1]);
 
-  /* "vision.pyx":233
+  /* "vision.pyx":234
  *     cdef int n_agents = agent_position.shape[0]
  *     cdef int max_agents_in_vision = agents_in_vision.shape[1]
  *     vision_field_array = np.zeros((i_tot, j_tot), dtype=np.float64)             # <<<<<<<<<<<<<<
  *     cdef double[:, :] vision_field = vision_field_array
  * 
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 233, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 233, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_i_tot); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 233, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_i_tot); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_j_tot); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 233, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_j_tot); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 233, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1)) __PYX_ERR(0, 233, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1)) __PYX_ERR(0, 234, __pyx_L1_error);
   __Pyx_GIVEREF(__pyx_t_3);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3)) __PYX_ERR(0, 233, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3)) __PYX_ERR(0, 234, __pyx_L1_error);
   __pyx_t_1 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 233, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4)) __PYX_ERR(0, 233, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4)) __PYX_ERR(0, 234, __pyx_L1_error);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 233, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 233, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float64); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 233, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float64); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 233, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 233, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 234, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -21127,52 +21127,52 @@ static PyObject *__pyx_pf_6vision_generate_vision_field(CYTHON_UNUSED PyObject *
   __pyx_v_vision_field_array = __pyx_t_5;
   __pyx_t_5 = 0;
 
-  /* "vision.pyx":234
+  /* "vision.pyx":235
  *     cdef int max_agents_in_vision = agents_in_vision.shape[1]
  *     vision_field_array = np.zeros((i_tot, j_tot), dtype=np.float64)
  *     cdef double[:, :] vision_field = vision_field_array             # <<<<<<<<<<<<<<
  * 
  *     current_agents_in_vision = np.zeros((n_agents,), dtype=np.int32)
  */
-  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_v_vision_field_array, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 234, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_to_MemoryviewSlice_dsds_double(__pyx_v_vision_field_array, PyBUF_WRITABLE); if (unlikely(!__pyx_t_6.memview)) __PYX_ERR(0, 235, __pyx_L1_error)
   __pyx_v_vision_field = __pyx_t_6;
   __pyx_t_6.memview = NULL;
   __pyx_t_6.data = NULL;
 
-  /* "vision.pyx":236
+  /* "vision.pyx":237
  *     cdef double[:, :] vision_field = vision_field_array
  * 
  *     current_agents_in_vision = np.zeros((n_agents,), dtype=np.int32)             # <<<<<<<<<<<<<<
  * 
  *     _generate_vision_field(
  */
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_zeros); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_n_agents); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_n_agents); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_5);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5)) __PYX_ERR(0, 236, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5)) __PYX_ERR(0, 237, __pyx_L1_error);
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_3);
-  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error);
+  if (__Pyx_PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3)) __PYX_ERR(0, 237, __pyx_L1_error);
   __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_int32); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_int32); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 236, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 236, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -21180,16 +21180,16 @@ static PyObject *__pyx_pf_6vision_generate_vision_field(CYTHON_UNUSED PyObject *
   __pyx_v_current_agents_in_vision = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "vision.pyx":246
+  /* "vision.pyx":247
  *         agent_indicies,
  *         agents_in_vision,
  *         current_agents_in_vision,             # <<<<<<<<<<<<<<
  *         max_agents_in_vision,
  *         world_TL,
  */
-  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_ds_int(__pyx_v_current_agents_in_vision, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 246, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_to_MemoryviewSlice_ds_int(__pyx_v_current_agents_in_vision, PyBUF_WRITABLE); if (unlikely(!__pyx_t_7.memview)) __PYX_ERR(0, 247, __pyx_L1_error)
 
-  /* "vision.pyx":238
+  /* "vision.pyx":239
  *     current_agents_in_vision = np.zeros((n_agents,), dtype=np.int32)
  * 
  *     _generate_vision_field(             # <<<<<<<<<<<<<<
@@ -21200,15 +21200,15 @@ static PyObject *__pyx_pf_6vision_generate_vision_field(CYTHON_UNUSED PyObject *
   __PYX_XCLEAR_MEMVIEW(&__pyx_t_7, 1);
   __pyx_t_7.memview = NULL; __pyx_t_7.data = NULL;
 
-  /* "vision.pyx":258
+  /* "vision.pyx":259
  *     )
  * 
  *     return np.clip(vision_field_array, 0.0, 1.0)             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 258, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 259, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_clip); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 258, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_clip); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 259, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -21229,7 +21229,7 @@ static PyObject *__pyx_pf_6vision_generate_vision_field(CYTHON_UNUSED PyObject *
     PyObject *__pyx_callargs[4] = {__pyx_t_3, __pyx_v_vision_field_array, __pyx_float_0_0, __pyx_float_1_0};
     __pyx_t_1 = __Pyx_PyObject_FastCall(__pyx_t_5, __pyx_callargs+1-__pyx_t_8, 3+__pyx_t_8);
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 258, __pyx_L1_error)
+    if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 259, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
@@ -21237,7 +21237,7 @@ static PyObject *__pyx_pf_6vision_generate_vision_field(CYTHON_UNUSED PyObject *
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "vision.pyx":214
+  /* "vision.pyx":215
  *             )
  * 
  * def generate_vision_field(             # <<<<<<<<<<<<<<
@@ -22574,17 +22574,17 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__20);
   __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(3, 0, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(1, 1, __pyx_L1_error)
 
-  /* "vision.pyx":214
+  /* "vision.pyx":215
  *             )
  * 
  * def generate_vision_field(             # <<<<<<<<<<<<<<
  *     double[:, :] agent_position not None,
  *     double[:] agent_angles not None,
  */
-  __pyx_tuple__22 = PyTuple_Pack(19, __pyx_n_s_agent_position, __pyx_n_s_agent_angles, __pyx_n_s_walls, __pyx_n_s_density, __pyx_n_s_offsets, __pyx_n_s_agent_indicies, __pyx_n_s_agents_in_vision, __pyx_n_s_world_TL, __pyx_n_s_grid_size, __pyx_n_s_vision_length, __pyx_n_s_fov, __pyx_n_s_n_rays, __pyx_n_s_i_tot, __pyx_n_s_j_tot, __pyx_n_s_n_agents, __pyx_n_s_max_agents_in_vision, __pyx_n_s_vision_field_array, __pyx_n_s_vision_field, __pyx_n_s_current_agents_in_vision); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 214, __pyx_L1_error)
+  __pyx_tuple__22 = PyTuple_Pack(19, __pyx_n_s_agent_position, __pyx_n_s_agent_angles, __pyx_n_s_walls, __pyx_n_s_density, __pyx_n_s_offsets, __pyx_n_s_agent_indicies, __pyx_n_s_agents_in_vision, __pyx_n_s_world_TL, __pyx_n_s_grid_size, __pyx_n_s_vision_length, __pyx_n_s_fov, __pyx_n_s_n_rays, __pyx_n_s_i_tot, __pyx_n_s_j_tot, __pyx_n_s_n_agents, __pyx_n_s_max_agents_in_vision, __pyx_n_s_vision_field_array, __pyx_n_s_vision_field, __pyx_n_s_current_agents_in_vision); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 215, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__22);
   __Pyx_GIVEREF(__pyx_tuple__22);
-  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(12, 0, 0, 19, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_vision_pyx, __pyx_n_s_generate_vision_field, 214, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 214, __pyx_L1_error)
+  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(12, 0, 0, 19, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_vision_pyx, __pyx_n_s_generate_vision_field, 215, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 215, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -23702,16 +23702,16 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_9 = __pyx_f_5numpy_import_array(); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(0, 9, __pyx_L1_error)
 
-  /* "vision.pyx":214
+  /* "vision.pyx":215
  *             )
  * 
  * def generate_vision_field(             # <<<<<<<<<<<<<<
  *     double[:, :] agent_position not None,
  *     double[:] agent_angles not None,
  */
-  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_6vision_1generate_vision_field, 0, __pyx_n_s_generate_vision_field, NULL, __pyx_n_s_vision, __pyx_d, ((PyObject *)__pyx_codeobj__23)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 214, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_CyFunction_New(&__pyx_mdef_6vision_1generate_vision_field, 0, __pyx_n_s_generate_vision_field, NULL, __pyx_n_s_vision, __pyx_d, ((PyObject *)__pyx_codeobj__23)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 215, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_generate_vision_field, __pyx_t_7) < 0) __PYX_ERR(0, 214, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_generate_vision_field, __pyx_t_7) < 0) __PYX_ERR(0, 215, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
   /* "vision.pyx":1

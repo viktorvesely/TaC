@@ -13,16 +13,20 @@ WPOS_MIDDLE = 1 # Middle placement
 
 class Grid:     # 2D grid world, handles spatial positioning, wall locations, and drawing of grid and walls
 
-    def __init__(self, size: float = 40, n_grids: int = 4) -> None:
-        
+    def __init__(self, walls: np.ndarray, size: float = 40) -> None:
+
+        self.walls = walls
+        n_grids = walls.shape[0]
+
+        if (n_grids % 2) != 0:
+            raise ValueError("N grids needs to be divisible by 2") 
+
         self.size = size # Cell size in grid
         self._tomid: np.ndarray = np.ones(2) * (self.size / 2) # Offset to get cell center
-        self.world_size = np.array([-size, size], dtype=np.float64) * n_grids # World size
-        self.world_TL = np.array([-size, -size], dtype=np.float64) * n_grids  # Top left corner of world
-        self.ngrids = n_grids * 2
+        self.world_size = np.array([-size, size], dtype=np.float64) * (n_grids / 2) # World size
+        self.world_TL = np.array([-size, -size], dtype=np.float64) * (n_grids / 2) # Top left corner of world
+        self.ngrids = n_grids
 
-        # Randomly generate walls (1 wall, 0 empty cell)
-        self.walls: np.ndarray = np.random.choice([1.0, 0.0], p=[0.05, 0.95], size=(self.ngrids, self.ngrids))
         self.grid_indicies = np.empty((self.ngrids, self.ngrids), dtype=object)
         for i in range(self.ngrids):
             for j in range(self.ngrids):
@@ -206,6 +210,7 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
     
     def tick(self):
 
+        state.agent_position = np.clip(state.agent_position, *(self.world_size + np.array([10, -10])))
         self.handle_wall_collision()
         state.agent_position = np.clip(state.agent_position, *(self.world_size + np.array([10, -10])))
 

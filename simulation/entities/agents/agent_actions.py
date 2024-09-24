@@ -56,7 +56,6 @@ class AgentActions:
             
             delta = state.agent_position[target_i, :] - state.agent_position[i_agent, :]
             if np.linalg.norm(delta) < 8:
-                print("THEFT")
                 state.agent_colors[i_agent, 0] = 255
                 state.agent_colors[i_agent, 1] = 255
                 state.agent_speed[i_agent, :] = 0.1
