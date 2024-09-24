@@ -9,12 +9,16 @@ from .utils import toMs
 from .camera import Camera
 
 
+main = __name__ == "__main__"
+
 def now():
     return toMs(perf_counter_ns())
 
-state = State()
+if main:
+    state = State()
 
 def realtime_simulation():
+    
 
     paused = False
 
@@ -27,8 +31,8 @@ def realtime_simulation():
     world = World(window)
     state.world = world
 
-    state.last_draw = now()
     state.last_tick = now()
+    state.start_t = now()
 
     with window:
 
@@ -44,10 +48,12 @@ def realtime_simulation():
             else:
                 realtime_simulation_cycle(window, camera, world)
 
-            sleep(0.005)
+            sleep((0.002))
+
+    print(state.t - state.start_t)
 
 def paused_simulation_cycle(window: Window, camera: Camera, world: World):
-
+    
     d = state.dTick_target
     state.t = now()  
 
@@ -78,9 +84,36 @@ def realtime_simulation_cycle(window: Window, camera: Camera, world: World):
 
     
 
+def experiment_simulation(desired_t_s: float):
+
+    import tqdm
+
+    state.window = Window()
+
+    world = World(state.window)
+    state.world = world
+
+    state.start_t = 0
+    state.t = state.start_t
+    state.last_tick = state.start_t
+    end_t = (desired_t_s * 1000) + state.start_t
+
+    n_steps: int = int((end_t - state.start_t) / state.dTick_target) + 1
+
+    actual_t = now()
+    with tqdm.tqdm(total=n_steps) as pbar:
+        while state.t < end_t:
+            d = state.dTick_target
+            state.t += d
+            state.dTick = d
+            world.tick()
+            state.last_tick = state.t
+            pbar.update()
+
+    print(now() - actual_t)
 
 
-if __name__ == "__main__":
+if main:
 
     realtime_simulation()
 

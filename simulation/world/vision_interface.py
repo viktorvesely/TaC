@@ -53,7 +53,7 @@ class Vision:
         
         keys = pygame.key.get_pressed()
 
-        if not keys[pygame.K_x]:
+        if keys[pygame.K_x]:
             self.draw_vision_map(surface)
 
     # Update vision field
@@ -74,64 +74,5 @@ class Vision:
             self.n_rays
         )
 
-    @classmethod
-    def generate_triangles(cls) -> np.ndarray:  # Generate vision triangle for each agent
-
-        pos = state.agent_position
-
-        triangles = np.empty((3, pos.shape[0], 2))
-        triangles[0, :, :] = pos
-
-        heading = np.empty_like(pos)
-        heading[:, 0] = np.cos(state.agent_angle)
-        heading[:, 1] = np.sin(state.agent_angle)
-
-        orthogonal = np.empty_like(heading) 
-        orthogonal[:, 0] = heading[:, 1]
-        orthogonal[:, 1] = -heading[:, 0]
-        orthogonal = orthogonal * cls.vision_spread
-
-        heading_end = pos + heading * cls.vision_length
-
-        triangles[1, :, :] = heading_end + orthogonal
-        triangles[2, :, :] = heading_end - orthogonal
-
-        return triangles
-    
-    @classmethod
-    def in_triangle(cls, triangle: np.ndarray, points: np.ndarray) -> np.ndarray: # Check if points are inside of given triangle
-        # https://stackoverflow.com/a/14382692/7020366
-
-        p0, p1, p2 = triangle
-        px, py = points.T
-        p0x, p0y = p0
-        p1x, p1y = p1
-        p2x, p2y = p2
-
-        # Calculate areas and return boolean mask indicating whether points are inside the triangle
-        s = cls.in_triangle_formula_term * (p0y * p2x - p0x * p2y + (p2y - p0y) * px + (p0x - p2x) * py)
-        t = cls.in_triangle_formula_term * (p0x * p1y - p0y * p1x + (p0y - p1y) * px + (p1x - p0x) * py)
-
-        return (s > 0) & (t > 0) & ((1 - s - t) > 0)
-    
-    def update_vision(self):
-
-        triangles = self.generate_triangles()
-
-        top_left = state.agent_position + self.lefttop
-        bottom_right = state.agent_position + self.rightbottom
-
-        # I think this can be vectorized
-        for i_agent in triangles.shape[1]:
-            tl = top_left[i_agent, :]
-            br = bottom_right[i_agent, :]
-            left, right, top, bottom = self.get_walls_inds_from_to(tl, br)
-            
-            w = self.grid.walls[top:bottom, left:right].reshape((-1,))
-            wpos = self.grid.walls_pos[top:bottom, left:right].reshape((-1, 2))
-            indicies = self.grid.grid_indicies[top:bottom, left:right].reshape((-1, 2))
-
-            not_wall_mask = np.isclose(w, 0)
-            
 
     

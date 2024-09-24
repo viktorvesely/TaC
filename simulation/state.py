@@ -26,9 +26,9 @@ class State(metaclass=Singleton):
         self.window: Window | None = None
 
         self.n_agents: int = -1
-        self.t: int = 0
-        self.last_draw: int = 0
-        self.last_tick: int = 0
+        self.start_t: float = 0
+        self.t: float = 0
+        self.last_tick: float = 0
 
         self.dTick_target: float = 17
         self.dTick: float = 0

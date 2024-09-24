@@ -1,5 +1,8 @@
 import numpy as np
 import pygame
+from .state import State
+
+state = State()
 
 class CameraMatrix:
     __slots__ = ('m',)
@@ -104,7 +107,7 @@ class Camera:
             if mag != 0:
                 translate = translate / mag
                 translate = translate * self.camera_speed * speed_boost / self.zoom
-            
+
             self.moveBy(translate, _update=False)
             self.zoomBy(zoomBy)
             
