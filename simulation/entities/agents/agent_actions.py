@@ -71,6 +71,9 @@ class AgentActions:
     weigths = np.array([3, 4, 1])
     weigths = weigths / weigths.sum()
 
+    
+    
+    
     @staticmethod
     def select_action(i_agent: int):
 
