@@ -12,6 +12,7 @@ class PointsOfInterests:
         
         self.grid: Grid = grid
         self.coords = np.empty((0, 2), dtype=np.int32)
+        self.attraction_factors = np.empty(0) # Attraction factors for each POI
         
 
     def add_random(self, N: int = 1):
@@ -28,6 +29,10 @@ class PointsOfInterests:
             self.grid.walls[i, j] = 2.0
         
         self.coords = np.vstack((self.coords, np.array(append)))
+        self.attraction_factors = np.append(self.attraction_factors, np.random.uniform(0 ,1, size=N))
+
+    def get_poi_attraction_factor(self, poi_index: int) -> float:
+        return self.attraction_factors[poi_index] # Return the attraction factor of a specific POI
 
 
     def draw(self, surface: pygame.Surface):
