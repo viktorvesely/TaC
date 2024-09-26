@@ -24,6 +24,7 @@ class Agent(AgentInterface):
         state.agent_colors = np.zeros((n, 3), dtype=np.int32)
         state.agent_colors[:, :] = 255
         state.agent_speed = np.full((n, 1), 0.1)
+        state.agent_near_poi = np.zeros(n, dtype=bool)  # New near poi flag initialization
         self.actions: list[Callable[[int], Callable]] = [AgentActions.select_action for _ in range(n)]
 
 

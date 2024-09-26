@@ -11,6 +11,16 @@ class AgentActions:
         return AgentActions.navigation
     
     @staticmethod
+    def stop_at_poi(i_agent: int):
+        finish_time = state.t + np.random.normal(loc=5, scale=1)  # Stop for a random time
+        def action(i_agent: int):
+            if state.t >= finish_time:
+                return AgentActions.select_action  # After stopping, select a new action
+            return action
+        return action
+
+
+    @staticmethod
     def navigation(i_agent: int):
         if state.world.maps.point(i_agent):
             return AgentActions.select_action
@@ -74,12 +84,30 @@ class AgentActions:
     
     
     
-    @staticmethod
-    def select_action(i_agent: int):
+    # @staticmethod
+    # def select_action(i_agent: int):
 
-        return np.random.choice(
-            [AgentActions.select_poi, AgentActions.start_roaming, AgentActions.theft],
-            p=AgentActions.weigths
+    #     return np.random.choice(
+    #         [AgentActions.select_poi, AgentActions.start_roaming, AgentActions.theft],
+    #         p=AgentActions.weigths
         
-        )
+    #     )
     
+
+    @staticmethod
+    def select_action(i_agent: int)
+        if state.agent_roles[i_agent] == "citizen":
+            if state.agent_near_poi[i_agent]:
+                return np.random.choice(
+                    [AgentActions.stop_at_poi, AgentActions.look_at_poi, AgentActions.move_away_from_poi],
+                    p=AgentActions.weights_poi_actions
+                )
+            else:
+                return np.random.choice(
+                    [AgentActions.select_poi, AgentActions.start_roaming],
+                    p=AgentActions.weights_navigation
+                )
+        elif state.agent_roles[i_agent] == "thief":
+            return np.random.choice(
+                #[thief behaviors]
+            )

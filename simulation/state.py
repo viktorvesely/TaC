@@ -46,3 +46,5 @@ class State(metaclass=Singleton):
         self.agents_in_vision: np.ndarray = None
         self.agent_colors: np.ndarray = None
         self.agent_speed: np.ndarray = None
+        self.agent_near_poi : np.ndarray = None # New agent near poi flag for citizens
+        self.last_poi_visited : np.ndarray = None # Stores last poi visited for citizens
