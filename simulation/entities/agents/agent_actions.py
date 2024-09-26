@@ -41,7 +41,9 @@ class AgentActions:
 
     @staticmethod
     def theft(i_agent: int):
-
+        """
+            Example of how speed is changed inside
+        """
         in_vision = state.agents_in_vision[i_agent, :]
 
         if in_vision[0] == -1:
@@ -57,7 +59,8 @@ class AgentActions:
             delta = state.agent_position[target_i, :] - state.agent_position[i_agent, :]
             if np.linalg.norm(delta) < 8:
                 state.agent_colors[i_agent, 0] = 255
-                state.agent_colors[i_agent, 1] = 255
+                state.agent_colors[i_agent, 1] = 0
+                state.agent_colors[i_agent, 2] = 0
                 state.agent_speed[i_agent, :] = 0.1
                 return AgentActions.start_roaming
             
@@ -70,9 +73,6 @@ class AgentActions:
    
     weigths = np.array([3, 4, 1])
     weigths = weigths / weigths.sum()
-
-    
-    
     
     @staticmethod
     def select_action(i_agent: int):

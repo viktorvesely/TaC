@@ -46,3 +46,4 @@ class State(metaclass=Singleton):
         self.agents_in_vision: np.ndarray = None
         self.agent_colors: np.ndarray = None
         self.agent_speed: np.ndarray = None
+        self.agent_role: np.ndarray = None
