@@ -27,16 +27,17 @@ class Agent(AgentInterface):
         state.agent_colors[:, :] = 255
         state.agent_speed = np.full((n, 1), 0.1)
         state.agent_near_poi = np.zeros(n, dtype=bool)  # New near poi flag initialization
-
+        
         state.agent_role = np.random.choice([True,False],n,p=[0.7,0.3]) #Array of booleans where True represents citizen and False represents thief
         self.actions: list[Callable[[int], Callable]] = []
+        self.agent_motivations = np.zeros((n,100)) # Array of motivations for each agent can go from 0 to 100
         for i in range(n):
             if state.agent_role[i]:
                 #setting the citizen color to green
                 state.agent_colors[i, 0] = 0
                 state.agent_colors[i, 1] = 255
                 state.agent_colors[i, 2] = 0
-                self.actions.append(CitizenActions.select_action(i))
+                self.actions.append(AgentActions.roaming())
             else:
                 #setting the thief color to red
                 state.agent_colors[i, 0] = 0
