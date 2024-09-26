@@ -7,6 +7,7 @@ import random
 from .agent_interface import AgentInterface
 from .agent_actions import AgentActions
 from .thief_actions import ThiefActions
+from .citizen_actions import CitizenActions
 
 from ...state import State
 
@@ -35,13 +36,13 @@ class Agent(AgentInterface):
                 state.agent_colors[i, 0] = 0
                 state.agent_colors[i, 1] = 255
                 state.agent_colors[i, 2] = 0
-                self.actions.append(AgentActions.roaming())
+                self.actions.append(CitizenActions.select_action(i))
             else:
                 #setting the thief color to red
                 state.agent_colors[i, 0] = 0
                 state.agent_colors[i, 1] = 0
                 state.agent_colors[i, 2] = 255
-                self.actions.append(ThiefActions.start_looking_for_target(i))
+                self.actions.append(AgentActions.roaming())
         #self.close_range = 0.1
 
     def look_random(self, i_agent: int, multiplier: float):

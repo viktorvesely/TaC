@@ -80,6 +80,11 @@ class GoogleMaps:
             new_path = self.navigate(tuple(agents_coords[i_agent, :]), tuple(self.pois.coords[rand_poi_i]))
             self.paths[i_agent] = new_path
         
+    def get_target_poi_index(self, i_agent: int) -> int:
+        return 0
+
+    def get_poi_position(self, i_poi: int) -> np.ndarray:
+        return self.pois.coords[i_poi]
 
     def navigate(self, start: tuple[int, int], goal: tuple[int, int]) -> list:
         # TODO fix navigation it is slow as hell

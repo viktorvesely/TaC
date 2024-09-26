@@ -31,7 +31,7 @@ class CitizenActions:
         def action(i_agent: int):
             
             if state.t >= finish_t:
-                return AgentActions.select_action
+                return CitizenActions.select_action
             
             state.world.agents.look_random(i_agent, multiplier)
             
@@ -95,6 +95,7 @@ class CitizenActions:
 
     @staticmethod
     def social_interaction(i_agent: int):
+        engagement_probability = 0.5  # Define the probability of engaging in social interaction
         # Get the positions of all citizens within a range defined as "nearby"
         nearby_agents = state.world.get_nearby_citizens(i_agent)  # Implement this
         for target_agent in nearby_agents:
