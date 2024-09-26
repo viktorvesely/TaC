@@ -43,7 +43,7 @@ class Agent(AgentInterface):
                 state.agent_colors[i, 1] = 0
                 state.agent_colors[i, 2] = 255
                 # setting the thief motivation to 0.5
-                state.agent_motivations[i,0] = 0.5
+                state.agent_motivations[i,0] = 0.4
                 self.actions.append(ThiefActions.start_looking_for_target(i))
         #self.close_range = 0.1
 
