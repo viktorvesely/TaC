@@ -5,42 +5,36 @@ from ...state import State
 state = State()
 
 class CitizenActions:
+    
+    weigths = np.array([4, 4, 0])
+    weigths = weigths / weigths.sum()
+    
     @staticmethod
     def select_action(i_agent: int):
-        return random.choices(
-            [CitizenActions.start_roaming, CitizenActions.move_to_poi, CitizenActions.social_interaction],
-            weights=[0.50, 0.40, 0.10]  # 50% of roaming randomly, 40% move at POI, 10% engage in social interaction
-        )[0](i_agent)  # Call the selected action
+        return np.random.choice(
+            [CitizenActions.start_roaming, CitizenActions.select_poi, CitizenActions.social_interaction],
+            p=CitizenActions.weigths  # 50% of roaming randomly, 40% move at POI, 10% engage in social interaction
+        )
 
     @staticmethod
     def start_roaming(i_agent: int):
+        print("Citizen-Roaming")
         return CitizenActions.roaming()
     
     @staticmethod
-    def move_to_poi(i_agent: int):
-        # Add stop at poi logic constant finish_t ? 
-        finish_t = state.t + np.random.normal(loc=10_000, scale=1_000)
-        multiplier = random.choice([-1, 1])
-        target_poi_index = state.world.maps.get_target_poi_index(i_agent)
-        last_poi_index = state.last_poi_visited[i_agent]
-
-        while target_poi_index == last_poi_index:
-            target_poi_index = state.world.maps.get_target_poi_index(i_agent)
-        def action(i_agent: int):
-            
-            if state.t >= finish_t:
-                state.world.agents.look_random(i_agent, multiplier)
-                return CitizenActions.select_action            
-            elif state.agent_near_poi[i_agent]:
-                state.agent_near_poi[i_agent] = True  # Set the flag to true when near the POI
-                state.last_poi_visited[i_agent] = target_poi_index
-                return CitizenActions.stop_at_poi(i_agent)
-            return action
-        
-        return action
-
+    def select_poi(i_agent: int):
+        print("Citizen-Selecting POI")
+        state.world.maps.navigate_agent(i_agent)
+        return CitizenActions.navigate
+    
+    @staticmethod
+    def navigate(i_agent: int):
+        if state.world.maps.point(i_agent):
+            return CitizenActions.select_action
+        return CitizenActions.navigate
+    
     @staticmethod 
-    def random_roaming(i_agent: int): 
+    def roaming(i_agent: int): 
         #Pending randomization
         finish_t = state.t + np.random.normal(loc=10_000, scale=1_000)
         multiplier = random.choice([-1, 1])
@@ -51,7 +45,32 @@ class CitizenActions:
             state.world.agents.look_random(i_agent, multiplier)
             return action
 
-        return
+        return action
+    
+    @staticmethod
+    def roaming():
+        # Add stop at poi logic constant finish_t ? 
+        finish_t = state.t + np.random.normal(loc=10_000, scale=1_000)
+        multiplier = random.choice([-1, 1])
+        # target_poi_index = state.world.maps.get_target_poi_index(i_agent)
+        # last_poi_index = state.last_poi_visited[i_agent]
+
+        # while target_poi_index == last_poi_index:
+        #     target_poi_index = state.world.maps.get_target_poi_index(i_agent)
+        def action(i_agent: int):
+            
+            if state.t >= finish_t:
+                return CitizenActions.select_action            
+            # elif state.agent_near_poi[i_agent]:
+            #     # state.agent_near_poi[i_agent] = True  # Set the flag to true when near the POI
+            #     # state.last_poi_visited[i_agent] = target_poi_index
+            #     return CitizenActions.stop_at_poi(i_agent)
+            state.world.agents.look_random(i_agent, multiplier)
+            return action
+            
+        return action
+
+  
 
     @staticmethod
     def stop_at_poi(i_agent: int):
@@ -61,14 +80,14 @@ class CitizenActions:
         finish_time = state.t + stop_duration
         
         # Get the attraction factor of the POI (defined between 0 and 1)
-        attraction_factor = state.world.pois.get_poi_attraction_factor(i_agent)
+        # attraction_factor = state.world.pois.get_poi_attraction_factor(i_agent)
 
-        if np.random.rand() < attraction_factor: # decide whether to look at POI or not
-            poi_position = state.world.maps.get_poi_position(i_agent)
-            direction_to_poi = poi_position - state.agent_position[i_agent]
-            state.agent_angle[i_agent] = np.arctan2(direction_to_poi[1], direction_to_poi[0])
-        else: # Look in random direction
-            state.agent_angle[i_agent] = np.random.uniform(0, 2 * np.pi)
+        # if np.random.rand() < attraction_factor: # decide whether to look at POI or not
+        #     poi_position = state.world.maps.get_poi_position(i_agent)
+        #     direction_to_poi = poi_position - state.agent_position[i_agent]
+        #     state.agent_angle[i_agent] = np.arctan2(direction_to_poi[1], direction_to_poi[0])
+        # else: # Look in random direction
+        #     state.agent_angle[i_agent] = np.random.uniform(0, 2 * np.pi)
         
         def action(i_agent: int): 
             # Continue stopping until the stop duration is reached
@@ -81,58 +100,57 @@ class CitizenActions:
     def social_interaction(i_agent: int):
         engagement_probability = 0.5  # Define the probability of engaging in social interaction
         # Get the positions of all citizens within a range defined as "nearby"
-        nearby_agents = state.world.get_nearby_citizens(i_agent)  # Implement this
-        for target_agent in nearby_agents:
+        in_vision = state.agents_in_vision[i_agent, :]
+        for agent in in_vision:
             if np.random.rand() < engagement_probability:  # Define engagement_probability
                 # Both citizens agree to interact
-                return CitizenActions.stop_at_citizen(i_agent, target_agent)  # You may want to adjust this to reflect a stopping interaction
+                return CitizenActions.stop_at_citizen(i_agent, agent)  # You may want to adjust this to reflect a stopping interaction
 
     @staticmethod
     def stop_at_citizen(i_agent: int, target_agent: int):
-        # Determine the positions of both citizens
-        target_position = state.agent_position[target_agent]
-        current_position = state.agent_position[i_agent]
-        
-        # Calculate the direction towards the target agent
-        direction = target_position - current_position
-        distance = np.linalg.norm(direction)
-        
-        # Normalize the direction if distance is greater than a threshold
-        if distance > 8:  # Define this threshold
-            direction_normalized = direction / distance
-            state.agent_velocity[i_agent] = direction_normalized * state.agent_speed[i_agent]
-            state.agent_position[i_agent] += state.agent_velocity[i_agent] * state.dTick
+        """
+        Makes the agent interact with a target agent (citizen), stopping movement once close.
+        The agents look at each other, change color to yellow, and stop for a specified time.
+        After the interaction, they resume moving away.
+        """
+        interaction_duration = 5_000  # 5 seconds in simulation time
+        finish_t = state.t + interaction_duration
 
-            # You can similarly move the target agent towards the interacting agent if desired
-            state.agent_velocity[target_agent] = -direction_normalized * state.agent_speed[target_agent]
-            state.agent_position[target_agent] += state.agent_velocity[target_agent] * state.dTick
+        # Both agents' colors change to yellow
+        state.agent_colors[i_agent, :] = [255, 255, 0]  # Yellow
+        state.agent_colors[target_agent, :] = [255, 255, 0]  # Yellow
+        
+        # Calculate the delta position between the two agents
+        delta = state.agent_position[target_agent, :] - state.agent_position[i_agent, :]
+        
+        # If the agents are within 8 units of each other
+        if np.linalg.norm(delta) < 8:
+            # Make them look at each other
+            angle = np.arctan2(delta[1], delta[0])
+            state.agent_angle[i_agent] = angle
+            state.agent_angle[target_agent] = angle + np.pi  # Opposite direction
             
-            return CitizenActions.stop_at_citizen(i_agent, target_agent)  # Keep moving until close enough
-
-        # If they're close enough, initiate interaction
-        interaction_duration = np.random.uniform(5000, 15000)
-        finish_time = state.t + interaction_duration
-
-        # Set both agents' angles to look at each other
-        direction_to_target = target_position - current_position
-        state.agent_angle[i_agent] = np.arctan2(direction_to_target[1], direction_to_target[0])
-        
-        direction_to_citizen = current_position - target_position
-        state.agent_angle[target_agent] = np.arctan2(direction_to_citizen[1], direction_to_citizen[0])
-
-        # Logic for stopping and engaging
-        while state.t < finish_time:
-            state.agent_speed[i_agent] = 0
-            state.agent_speed[target_agent] = 0
-        
-        # After the interaction, both citizens will move away
-        CitizenActions.move_away(i_agent)
-        CitizenActions.move_away(target_agent)
-        return
+            # Define the inner action that gets repeated during the interaction period
+            def action(i_agent: int):
+                # Stop both agents
+                state.agent_speed[i_agent, :] = 0
+                state.agent_speed[target_agent, :] = 0
+                
+                # Continue until the interaction time is over
+                if state.t >= finish_t:
+                    # After the interaction, both agents will move away
+                    CitizenActions.move_away(i_agent)
+                    CitizenActions.move_away(target_agent)
+                    return CitizenActions.select_action  # Proceed to the next action after interaction
+                
+                # Keep returning the same action until the time is up
+                return action
+            
+            return action
 
 
     @staticmethod
     def move_away(i_agent: int):
-        state.agemt_speed[i_agent,:] = 0.18
-        state.agent_near_poi[i_agent] = False   # Set flag false
+        state.agent_speed[i_agent,:] = 0.18
+        # state.agent_near_poi[i_agent] = False   # Set flag false
         return CitizenActions.start_roaming[i_agent] # Select another action

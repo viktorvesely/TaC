@@ -31,21 +31,30 @@ class ThiefActions():
             
                 
     """
+  
+        
     #This is similar to agent_actions.py 's roaming function
     @staticmethod
     def start_looking_for_target(i_agent: int):
-        return ThiefActions.looking_for_target(i_agent)
+        print("Thief- Starting Looking for target")
+        if ThiefActions._check_conditions(i_agent):
+            return ThiefActions.look_for_target
+        return ThiefActions.start_looking_for_target 
      
     @staticmethod
     def start_approaching_target(i_agent: int):
         return ThiefActions.approach_target(i_agent)
     
     @staticmethod
-    def looking_for_target(i_agent: int):
+    def look_for_target(i_agent: int):
         """
            If appropiate target found, start aproaching to target calling ThiefActions.approach_target
            Else keep looking for target  
         """
+        print("Thief-Looking for target")
+        print("Agent", i_agent)
+        print("Agent Motivation: ", state.agent_motivations[i_agent])
+        print("Agent Vision: ", state.agents_in_vision[i_agent, :])
         agents_in_vision = state.agents_in_vision[i_agent, :]
         agent_mask = agents_in_vision != -1
         agents = agents_in_vision[agent_mask]
@@ -53,23 +62,12 @@ class ThiefActions():
         agents_in_vision_coords = state.agent_coords[agents, :]
         
         for agent in agents_in_vision_coords:
-            if state.world.vision.values[agent[0], agent[1]] < 0:
+            if (state.world.vision.values[agent[0], agent[1]] + state.agent_motivations[i_agent])/2 < 0:
                 return ThiefActions.approach_target
             
         return ThiefActions.looking_for_target
         
-    @staticmethod 
-    def check_conditions(i_agent: int):
-        """
-            Check if agent is near target
-            If agent is near target, return True
-            Else return False
-        """
-        agent_coords = state.agent_coords[i_agent, :]
-        target_coords = state.target_coords
-        if np.max(np.abs(agent_coords - target_coords)) <= 1:
-            return True
-        return False 
+    
     
     #Only if I want memory between ticks i need ineer action functino
     @staticmethod
@@ -82,3 +80,9 @@ class ThiefActions():
             pass
         return action
     
+    def _check_conditions(i_agent: int) -> bool:
+        """
+            Check if conditions are met to start theft process , if motivation, visibility > threshold
+        """
+        motivation = state.agent_motivations[i_agent,:]
+        return True if motivation > 0.4 else False
