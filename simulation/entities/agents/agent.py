@@ -6,6 +6,8 @@ import random
 
 from .agent_interface import AgentInterface
 from .agent_actions import AgentActions
+from .thief_actions import ThiefActions
+from .citizen_actions import CitizenActions
 
 from ...state import State
 
@@ -22,10 +24,28 @@ class Agent(AgentInterface):
         state.agent_angle = np.random.random(n) * np.pi * 2
         state.n_agents = n
         state.agent_colors = np.zeros((n, 3), dtype=np.int32)
-        state.agent_colors[:, :] = 255
+        state.agent_colors[:, :] = 255 # White color initialization
         state.agent_speed = np.full((n, 1), 0.1)
-        self.actions: list[Callable[[int], Callable]] = [AgentActions.select_action for _ in range(n)]
-
+        state.agent_near_poi = np.zeros(n, dtype=bool)  # New near poi flag initialization
+        state.agent_motivations = np.zeros((n,1)) # Array of motivations for each agent
+        state.agent_role = np.random.choice([True,False],n,p=[0.7,0.3]) #Array of booleans where True represents citizen and False represents thief
+        self.actions: list[Callable[[int], Callable]] = []    
+        for i in range(n):
+            if state.agent_role[i]:
+                #setting the citizen color to green
+                state.agent_colors[i, 0] = 0
+                state.agent_colors[i, 1] = 255
+                state.agent_colors[i, 2] = 0
+                self.actions.append(CitizenActions.select_action(i))
+            else:
+                #setting the thief color to blue
+                state.agent_colors[i, 0] = 0
+                state.agent_colors[i, 1] = 0
+                state.agent_colors[i, 2] = 255
+                # setting the thief motivation to 0.5
+                state.agent_motivations[i,0] = 0.4
+                self.actions.append(ThiefActions.start_looking_for_target(i))
+        #self.close_range = 0.1
 
     def look_random(self, i_agent: int, multiplier: float):
         state.agent_angle[i_agent] = state.agent_angle[i_agent] + (0.0008 * multiplier * state.dTick) % (np.pi * 2)
@@ -36,11 +56,9 @@ class Agent(AgentInterface):
         """
         
         super().tick()
-
-        
         for i, action in enumerate(self.actions):
-            nex_action = action(i)
-            self.actions[i] = nex_action
+            next_action = action(i)
+            self.actions[i] = next_action
         # 
         state.agent_velocity = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T * state.agent_speed
         

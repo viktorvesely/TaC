@@ -57,33 +57,4 @@ class World(WorldInterface):             # Concrete implementation of WorldInter
         self.grid.tick()
         self.vision.tick()
         # self.maps.tick()
-        
-    def handle_collisions(self):
-        #Cases to handle:
-        # - Agent collides with wall
-        # - Agent collides with another agent
-            # - Thief and Citizen collides
-            # - Thief and Thief collides
-            # - Citizen and Citizen collides
-        pass
-    
-    def check_collision(self, agent1: Agent, agent2: Agent):
-        pass
-    
-    def resolve_collision(self, agent1: Agent, agent2: Agent):
-        pass
-                    
-    def populate_world(self, n_agents: int):
-        n_thiefs = int(n_agents * 0.3)                   # 30% thieves
-        n_citizens = n_agents - n_thiefs
-
-        agent_data = [
-            (Thief, n_thiefs ,np.array([255, 0, 0])),    # Thieves are red
-            (Citizen, n_citizens, np.array([0, 255, 0])) # Citizens are green
-        ]
-        
-        for agent_type, n, color in agent_data:
-            for _ in range(n):
-                position =  self.window.window_size * np.random.rand(2) - self.window.window_size / 2   # In random position within window
-                agent = agent_type(position, color)                                                     # Create agent of agent_type
-                self.add_agent(agent)                                                                   # Add agent to world
+   

@@ -32,6 +32,19 @@ class GoogleMaps:
         return abs(source[0] - destination[0]) + abs(source[1] - destination[1]) + self.grid.density[source[0], source[1]]
     
     def point(self, i_agent: int) -> bool:
+        """
+        Updates the agent's path and orientation based on its current position.
+        Args:
+            i_agent (int): The index of the agent to update.
+        Returns:
+            bool: True if the agent has reached its goal, False otherwise.
+        The function performs the following steps:
+        1. Retrieves the agent's current coordinates and path.
+        2. Checks if the agent is within one unit of its goal. If so, clears the path and returns True.
+        3. If the agent is at the next step in its path, updates the path to remove the completed step.
+        4. Calculates the next step's world position and the delta to the agent's current position.
+        5. Computes the angle the agent needs to face based on the delta and updates the agent's state.
+        """
 
         agent_coords: np.ndarray = state.agent_coords[i_agent, :] 
         path = self.paths[i_agent]
@@ -61,6 +74,19 @@ class GoogleMaps:
         return False
         
     def navigate_agent(self, i_agent: int):
+        """
+        Navigate the specified agent to a random point of interest (POI).
+
+        This method selects a random POI from the list of POIs and calculates a new path
+        for the agent to navigate from its current coordinates to the coordinates of the
+        selected POI. The new path is then stored in the paths attribute for the agent.
+
+        Args:
+            i_agent (int): The index of the agent to navigate.
+
+        Returns:
+            None
+        """
         agent_coords = state.agent_coords[i_agent]
         rand_poi_i = np.random.choice(self.pois.coords.shape[0])
         new_path = self.navigate(tuple(agent_coords), tuple(self.pois.coords[rand_poi_i]))
@@ -79,6 +105,11 @@ class GoogleMaps:
             new_path = self.navigate(tuple(agents_coords[i_agent, :]), tuple(self.pois.coords[rand_poi_i]))
             self.paths[i_agent] = new_path
         
+    def get_target_poi_index(self, i_agent: int) -> int:
+        return 0
+
+    def get_poi_position(self, i_poi: int) -> np.ndarray:
+        return self.pois.coords[i_poi]
 
     def navigate(self, start: tuple[int, int], goal: tuple[int, int]) -> list:
         # TODO fix navigation it is slow as hell
