@@ -27,7 +27,6 @@ class GoogleMaps:
         self.pois = pois
         self.paths = [None for _ in range(state.agent_position.shape[0])]
 
-    
 
     def heuristic(self, source, destination):
         return abs(source[0] - destination[0]) + abs(source[1] - destination[1]) + self.grid.density[source[0], source[1]]
