@@ -20,6 +20,7 @@ class Vision:
         self.grid = grid
         self.values = np.zeros_like(self.grid.walls)
         self.max_targets_per_agent: int = 5
+        state.agents_in_vision = np.full((state.n_agents, self.max_targets_per_agent), -1, dtype=np.int32)
 
 
     def draw_vision_map(self, surface: Surface):
