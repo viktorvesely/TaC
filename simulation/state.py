@@ -43,7 +43,6 @@ class State(metaclass=Singleton):
         self.agent_velocity: np.ndarray = None
         self.agent_angle: np.ndarray = None
         self.agent_coords: np.ndarray = None
-        self.agents_in_vision: np.ndarray = None
         self.agent_colors: np.ndarray = None
         self.agent_speed: np.ndarray = None
         self.agent_near_poi : np.ndarray = None # New agent near poi flag for citizens

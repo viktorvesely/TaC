@@ -88,7 +88,10 @@ class GoogleMaps:
             None
         """
         agent_coords = state.agent_coords[i_agent]
-        rand_poi_i = np.random.choice(self.pois.coords.shape[0])
+        if state.agent_role[i_agent]:
+            rand_poi_i = np.random.choice(self.pois.coords.shape[0])
+        else:
+            rand_poi_i = np.random.choice(self.pois.coords.shape[1])
         new_path = self.navigate(tuple(agent_coords), tuple(self.pois.coords[rand_poi_i]))
         self.paths[i_agent] = new_path
 
