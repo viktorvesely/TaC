@@ -16,6 +16,7 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
     def __init__(self, walls: np.ndarray, size: float = 40) -> None:
 
         self.walls = walls
+        self.walkable_mask = np.isclose(walls, 0.0)
         n_grids = walls.shape[0]
 
         if (n_grids % 2) != 0:
@@ -35,6 +36,7 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
         self.density: np.ndarray = np.zeros_like(self.walls, dtype=np.int32)
         self.offsets: np.ndarray = np.zeros_like(self.walls, dtype=np.int32)
         self.homogenous_indicies: np.ndarray | None = None 
+        self.register_agent_coords()
 
     
 
@@ -196,7 +198,7 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
 
     def register_agent_coords(self):
 
-        agent_coords = state.agent_coords
+        agent_coords = state.agent_coords if state.agent_coords is not None else self.vectorized_world_to_cell(state.agent_position)
         i, j = agent_coords.T
         self.density = np.zeros((self.ngrids, self.ngrids), dtype=np.int32)
         np.add.at(self.density, (i, j), 1.0)

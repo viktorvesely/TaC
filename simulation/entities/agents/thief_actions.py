@@ -36,7 +36,7 @@ class ThiefActions():
     #This is similar to agent_actions.py 's roaming function
     @staticmethod
     def start_looking_for_target(i_agent: int):
-        print("Thief- Starting Looking for target")
+        # print("Thief- Starting Looking for target")
         if ThiefActions._check_conditions(i_agent):
             return ThiefActions.look_for_target
         return ThiefActions.start_looking_for_target 

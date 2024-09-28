@@ -1,8 +1,10 @@
 from pygame import Surface
 import pygame
+import numpy as np
 
 from ..entities.agents.agent import Agent
 from ..window import Window
+from ..state import State
 
 from .world_interface import WorldInterface
 from .grid import Grid
@@ -11,13 +13,13 @@ from .poi import PointsOfInterests
 from .navigation import GoogleMaps
 from .generation import WorldGenerator
 
-import numpy as np
+state = State() 
 
 class World(WorldInterface):             # Concrete implementation of WorldInterface
     def __init__(self, window: Window):
         
         n_agents = 300
-        n_grids = 66
+        n_grids = 48
         self.generator = WorldGenerator(n_grids)
         self.window = window
         self.agents = Agent(n_agents)
@@ -26,6 +28,9 @@ class World(WorldInterface):             # Concrete implementation of WorldInter
         self.pois = PointsOfInterests(self.grid)
         self.pois.add_random(5)
         self.maps = GoogleMaps(self.grid, self.pois)
+        
+        state.maps = self.maps
+        state.grid = self.grid
             
     
     def add_agent(self, agent: Agent):  # Add agents to world
@@ -48,6 +53,8 @@ class World(WorldInterface):             # Concrete implementation of WorldInter
         self.grid.draw(surface)
         self.pois.draw(surface)
         self.vision.draw(surface)
+
+        self.window.manager.draw_ui(surface)
 
         pygame.display.flip()
 

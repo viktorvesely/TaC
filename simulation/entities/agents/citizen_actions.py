@@ -1,8 +1,14 @@
 import numpy as np
 import random
+
+from .agent_actions import ActionFunc
 from ...state import State
 
 state = State()
+
+introvert_roaming = 0
+extrovert_roaming = 1
+roaming_types = (introvert_roaming, extrovert_roaming)
 
 class CitizenActions:
     
@@ -16,61 +22,78 @@ class CitizenActions:
             p=CitizenActions.weigths  # 50% of roaming randomly, 40% move at POI, 10% engage in social interaction
         )
 
-    @staticmethod
-    def start_roaming(i_agent: int):
-        print("Citizen-Roaming")
-        return CitizenActions.roaming()
     
     @staticmethod
     def select_poi(i_agent: int):
-        print("Citizen-Selecting POI")
-        state.world.maps.navigate_agent(i_agent)
+
+        to = state.world.pois.select_random()
+
+        state.maps.navigate_agent(i_agent, to)
         return CitizenActions.navigate
     
     @staticmethod
     def navigate(i_agent: int):
-        if state.world.maps.point(i_agent):
-            return CitizenActions.select_action
+        if state.maps.execute_path(i_agent):
+            return CitizenActions.wait_and_look(
+                i_agent,
+                np.random.randint(5_000, 15_000),
+                np.pi / 6, CitizenActions.select_action
+            )
         return CitizenActions.navigate
     
-    @staticmethod 
-    def roaming(i_agent: int): 
-        #Pending randomization
-        finish_t = state.t + np.random.normal(loc=10_000, scale=1_000)
-        multiplier = random.choice([-1, 1])
 
-        def action(i_agent: int):
-            if state.t >= finish_t:
-                return CitizenActions.select_action
-            state.world.agents.look_random(i_agent, multiplier)
-            return action
+    @staticmethod
+    def start_roaming(i_agent: int):
 
-        return action
+        roaming_type = np.random.choice(roaming_types)
+
+        if roaming_type == introvert_roaming:
+            walkable_density = 1 / state.grid.density[state.grid.walkable_mask].flatten()
+            walkable_density[np.isinf(walkable_density)] = 1.5
+            walkable_inds = state.grid.grid_indicies[state.grid.walkable_mask].flatten()
+
+            walkable_p = walkable_density / walkable_density.sum()
+            go_to = np.random.choice(walkable_inds, p=walkable_p)
+        
+        elif roaming_type == extrovert_roaming:
+            walkable_density = state.grid.density[state.grid.walkable_mask].flatten()
+            walkable_inds = state.grid.grid_indicies[state.grid.walkable_mask].flatten()
+
+            walkable_p = walkable_density / walkable_density.sum()
+            go_to = np.random.choice(walkable_inds, p=walkable_p)
+            
+        
+        state.maps.navigate_agent(i_agent, go_to)
+
+        return CitizenActions.roaming
     
     @staticmethod
-    def roaming():
-        # Add stop at poi logic constant finish_t ? 
-        finish_t = state.t + np.random.normal(loc=10_000, scale=1_000)
-        multiplier = random.choice([-1, 1])
-        # target_poi_index = state.world.maps.get_target_poi_index(i_agent)
-        # last_poi_index = state.last_poi_visited[i_agent]
-
-        # while target_poi_index == last_poi_index:
-        #     target_poi_index = state.world.maps.get_target_poi_index(i_agent)
-        def action(i_agent: int):
-            
-            if state.t >= finish_t:
-                return CitizenActions.select_action            
-            # elif state.agent_near_poi[i_agent]:
-            #     # state.agent_near_poi[i_agent] = True  # Set the flag to true when near the POI
-            #     # state.last_poi_visited[i_agent] = target_poi_index
-            #     return CitizenActions.stop_at_poi(i_agent)
-            state.world.agents.look_random(i_agent, multiplier)
-            return action
-            
-        return action
+    def roaming(i_agent: int):
+        if state.maps.execute_path(i_agent):
+            return CitizenActions.wait_and_look(i_agent, 5_000, np.pi / 5, CitizenActions.select_action)
+        return CitizenActions.roaming
 
   
+    @staticmethod
+    def wait_and_look(i_agent: int, time_ms: float, look_deviation: float, after_action: ActionFunc):
+
+        t_finish = state.t + time_ms
+        original_angle = state.agent_angle[i_agent]
+        next_devation = state.t
+
+        def action(i_agent: int):
+            nonlocal next_devation
+            
+            if t_finish >= state.t:
+                return after_action
+
+            if next_devation >= state.t:
+                state.agent_angle[i_agent] = original_angle + (random.random() - 0.5) * 2 * look_deviation
+                next_devation += 800
+        
+            return action  
+
+        return action
 
     @staticmethod
     def stop_at_poi(i_agent: int):
@@ -148,9 +171,3 @@ class CitizenActions:
             
             return action
 
-
-    @staticmethod
-    def move_away(i_agent: int):
-        state.agent_speed[i_agent,:] = 0.18
-        # state.agent_near_poi[i_agent] = False   # Set flag false
-        return CitizenActions.start_roaming[i_agent] # Select another action

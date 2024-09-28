@@ -7,6 +7,8 @@ if TYPE_CHECKING:
     from .window import Window
     from .world.world import World
     from .camera import Camera
+    from .world.navigation import GoogleMaps
+    from .world.grid import Grid
 
 from .utils import ms
 
@@ -22,6 +24,8 @@ class State(metaclass=Singleton):
     def __init__(self) -> None:
         
         self.world: World = None
+        self.maps: GoogleMaps = None
+        self.grid: Grid = None
         self.events: list[Event] = []
         self.window: Window | None = None
 
@@ -46,7 +50,5 @@ class State(metaclass=Singleton):
         self.agents_in_vision: np.ndarray = None
         self.agent_colors: np.ndarray = None
         self.agent_speed: np.ndarray = None
-        self.agent_near_poi : np.ndarray = None # New agent near poi flag for citizens
-        self.last_poi_visited : np.ndarray = None # Stores last poi visited for citizens
         self.agent_role: np.ndarray = None
         self.agent_motivations: np.ndarray = None

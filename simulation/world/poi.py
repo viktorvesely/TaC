@@ -14,6 +14,10 @@ class PointsOfInterests:
         self.coords = np.empty((0, 2), dtype=np.int32)
         self.attraction_factors = np.empty(0) # Attraction factors for each POI
         
+    def select_random(self) -> tuple[int, int]:
+        rand_i = np.random.randint(0, self.coords.shape[0])
+        return tuple(self.coords[rand_i, :])
+        
 
     def add_random(self, N: int = 1):
 

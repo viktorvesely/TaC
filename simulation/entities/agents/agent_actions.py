@@ -1,8 +1,11 @@
 import random
+from typing import Callable
 import numpy as np
 from ...state import State
 
 state = State()
+
+type ActionFunc = Callable[[int], ActionFunc]
 
 class AgentActions:
     @staticmethod
@@ -12,7 +15,7 @@ class AgentActions:
     
     @staticmethod
     def navigation(i_agent: int):
-        if state.world.maps.point(i_agent):
+        if state.world.maps.execute_path(i_agent):
             return AgentActions.select_action
         
         return AgentActions.navigation

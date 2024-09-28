@@ -1,3 +1,4 @@
+from typing import Callable
 import numpy as np
 import heapq
 import time
@@ -9,6 +10,8 @@ from ..state import State
 
 pi = np.pi
 state = State()
+
+type HeuristicFunc = Callable[[tuple[int, int], tuple[int, int]], float]
 
 class GoogleMaps:
 
@@ -28,10 +31,14 @@ class GoogleMaps:
         self.paths = [None for _ in range(state.agent_position.shape[0])]
 
 
-    def heuristic(self, source, destination):
+    def heuristic_avoid_dense(self, source: tuple[int, int], destination: tuple[int, int]) -> float:
         return abs(source[0] - destination[0]) + abs(source[1] - destination[1]) + self.grid.density[source[0], source[1]]
     
-    def point(self, i_agent: int) -> bool:
+    
+    def heuristic(self, source: tuple[int, int], destination: tuple[int, int]) -> float:
+        return abs(source[0] - destination[0]) + abs(source[1] - destination[1])
+
+    def execute_path(self, i_agent: int) -> bool:
         """
         Updates the agent's path and orientation based on its current position.
         Args:
@@ -63,33 +70,14 @@ class GoogleMaps:
 
         cell_pos = self.grid.cell_pos_to_world_pos(nex_step, 1)
         delta = cell_pos - agent_pos
-        #delta = np.clip(np.round(delta), -1, 1)
-        #angle = self.delta_to_angle[tuple(delta.astype(int))]
-
-        # TODO WHY + (PI / 2) : ((((
-        # angle = np.arctan2(-delta[1], delta[0]) + (pi / 2)
         angle = np.arctan2(delta[1], delta[0])
         state.agent_angle[i_agent] = angle
 
         return False
         
-    def navigate_agent(self, i_agent: int):
-        """
-        Navigate the specified agent to a random point of interest (POI).
-
-        This method selects a random POI from the list of POIs and calculates a new path
-        for the agent to navigate from its current coordinates to the coordinates of the
-        selected POI. The new path is then stored in the paths attribute for the agent.
-
-        Args:
-            i_agent (int): The index of the agent to navigate.
-
-        Returns:
-            None
-        """
+    def navigate_agent(self, i_agent: int, to: tuple[int, int], heuristic: HeuristicFunc | None = None):
         agent_coords = state.agent_coords[i_agent]
-        rand_poi_i = np.random.choice(self.pois.coords.shape[0])
-        new_path = self.navigate(tuple(agent_coords), tuple(self.pois.coords[rand_poi_i]))
+        new_path = self.navigate(tuple(agent_coords), to, heuristic)
         self.paths[i_agent] = new_path
 
     def tick(self):
@@ -98,7 +86,7 @@ class GoogleMaps:
         for i_agent, path in enumerate(self.paths):
 
             if path is not None:
-                self.point(i_agent, agents_coords[i_agent])
+                self.execute_path(i_agent, agents_coords[i_agent])
                 continue
             
             rand_poi_i = np.random.choice(self.pois.coords.shape[0])
@@ -111,10 +99,18 @@ class GoogleMaps:
     def get_poi_position(self, i_poi: int) -> np.ndarray:
         return self.pois.coords[i_poi]
 
-    def navigate(self, start: tuple[int, int], goal: tuple[int, int]) -> list:
+    def navigate(
+            self,
+            start: tuple[int, int],
+            goal: tuple[int, int],
+            heuristic: HeuristicFunc | None = None
+
+        ) -> list:
         # TODO fix navigation it is slow as hell
         """Perform the A* algorithm with a given grid, start and goal positions."""
         walls = self.grid.walls
+
+        heuristic = heuristic if heuristic is not None else self.heuristic 
         
         # Priority queue: stores tuples (cost, position)
         open_set = []
@@ -164,7 +160,7 @@ class GoogleMaps:
                         # This path to neighbor is better than any previous one. Record it!
                         came_from[neighbor] = current
                         g_score[neighbor] = tentative_g_score
-                        f_score = tentative_g_score + self.heuristic(neighbor, goal)
+                        f_score = tentative_g_score + heuristic(neighbor, goal)
                         heapq.heappush(open_set, (f_score, neighbor))
         
         return None  # No path found
