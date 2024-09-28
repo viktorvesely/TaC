@@ -81,13 +81,18 @@ class CitizenActions:
         original_angle = state.agent_angle[i_agent]
         next_devation = state.t
 
+        original_speed = state.agent_speed[i_agent]
+        state.agent_speed[i_agent] = 0
+
         def action(i_agent: int):
             nonlocal next_devation
             
-            if t_finish >= state.t:
+            if state.t >= t_finish:
+                state.agent_speed[i_agent] = original_speed
+                print(original_speed)
                 return after_action
 
-            if next_devation >= state.t:
+            if state.t >= next_devation:
                 state.agent_angle[i_agent] = original_angle + (random.random() - 0.5) * 2 * look_deviation
                 next_devation += 800
         

@@ -28,11 +28,11 @@ class Agent(AgentInterface):
         state.agent_colors[:, :] = 255 # White color initialization
         state.agent_speed = np.full((n, 1), 0.1)
         state.agent_motivations = np.zeros((n,1)) # Array of motivations for each agent
-        state.agent_role = np.random.choice([True,False],n,p=[0.7,0.3]) #Array of booleans where True represents citizen and False represents thief
+        state.agent_is_citizen = np.random.choice([True,False],n,p=[0.7,0.3]) #Array of booleans where True represents citizen and False represents thief
         self.actions: list[Callable[[int], Callable]] = []    
 
         for i in range(n):
-            if state.agent_role[i]:
+            if state.agent_is_citizen[i]:
                 #setting the citizen color to green
                 state.agent_colors[i, 0] = 0
                 state.agent_colors[i, 1] = 255
@@ -45,7 +45,7 @@ class Agent(AgentInterface):
                 state.agent_colors[i, 2] = 0
                 # setting the thief motivation to 0.5
                 state.agent_motivations[i,0] = 0.5
-                self.actions.append(ThiefActions.select_point_of_interest)
+                self.actions.append(ThiefActions.selects_dense_area)
         #self.close_range = 0.1
 
     def look_random(self, i_agent: int, multiplier: float):
@@ -57,7 +57,7 @@ class Agent(AgentInterface):
         """
         
         super().tick()
-        
+
         for i, action in enumerate(self.actions):
             next_action = action(i)
             self.actions[i] = next_action

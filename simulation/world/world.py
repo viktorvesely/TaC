@@ -18,8 +18,8 @@ state = State()
 class World(WorldInterface):             # Concrete implementation of WorldInterface
     def __init__(self, window: Window):
         
-        n_agents = 300
-        n_grids = 48
+        n_agents = 6
+        n_grids = 12
         self.generator = WorldGenerator(n_grids)
         self.window = window
         self.agents = Agent(n_agents)

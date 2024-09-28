@@ -10,10 +10,15 @@ class ThiefActions():
     """
 
     @staticmethod
-    def select_point_of_interest(i_agent: int):
-        # Start navigating to a point of interest
+    def selects_dense_area(i_agent: int):
+        walkable_density = state.grid.density[state.grid.walkable_mask].flatten()
+        walkable_inds = state.grid.grid_indicies[state.grid.walkable_mask].flatten()
+
+        walkable_p = walkable_density / walkable_density.sum()
+        go_to = np.random.choice(walkable_inds, p=walkable_p)
         
-        state.world.maps.navigate_agent(i_agent)
+        # Yuo can create your own heuristic function
+        state.world.maps.navigate_agent(i_agent, go_to, heuristic=None)
         return ThiefActions.navigate
     
     @staticmethod
@@ -21,13 +26,13 @@ class ThiefActions():
         # Check if the agent has reached the point of interest
         state.agent_speed[i_agent, :] = 0.1
         state.agent_colors[i_agent, :] = [255, 0, 0]  # Set color to red for "investigating"
-        state.agent_motivations[i_agent]+= state.t /1000.0 # Increase motivation over time
+        state.agent_motivations[i_agent]+= state.dTick / 100  # Increase motivation over time
 
-        if state.world.maps.point(i_agent):
+        if state.world.maps.execute_path(i_agent):
             # If the point of interest is reached, select the next point of interest
-            return ThiefActions.select_point_of_interest(i_agent)
+            return ThiefActions.selects_dense_area
         elif state.agent_motivations[i_agent] >= 0.5:
-            ThiefActions.look_for_target(i_agent)  # Start looking for a target
+            return ThiefActions.look_for_target  # Start looking for a target
         # Continue navigating until the point of interest is reached
         return ThiefActions.navigate
     
@@ -39,15 +44,23 @@ class ThiefActions():
         """
         agents_in_vision = state.agents_in_vision[i_agent, :]
         agent_mask = agents_in_vision != -1
-        agents = agents_in_vision[agent_mask]
+        agent_in_vision_inds = agents_in_vision[agent_mask]
         
         # Check if there are any visible agents
-        agents_in_vision_coords = state.agent_coords[agents, :]
-        for agent in agents_in_vision_coords:
-            if (-state.world.vision.values[agent[0], agent[1]] + state.agent_motivations[i_agent]) > 0.5:
-                return ThiefActions.approach_target(i_agent, agent)  # Start approaching the selected target
+        for target_i in agent_in_vision_inds:
+
+            if not state.agent_is_citizen[target_i]:
+                continue
+
+            target_coords = state.agent_coords[target_i, :]
+            factor1 = -state.world.vision.values[target_coords[0], target_coords[1]]
+            factor2 = state.agent_motivations[i_agent]
+
+
+            if (factor1 + factor2) > 0.5:
+                return ThiefActions.approach_target(i_agent, target_i)  # Start approaching the selected target
             
-        return ThiefActions.look_for_target  
+        return ThiefActions.navigate  
 
     @staticmethod
     def approach_target(i_agent: int, target_i: int):
@@ -60,7 +73,9 @@ class ThiefActions():
             # Calculate distance to the target
             delta = state.agent_position[target_i, :] - state.agent_position[i_agent, :]
             # If within range, attempt theft
-            print(f"Thief {i_agent} approaching target {target_i} with distance {np.linalg.norm(delta)}")
+            # print(f"Thief {i_agent} approaching target {target_i} with distance {np.linalg.norm(delta)}")
+            angle = np.arctan2(delta[1], delta[0])
+            state.agent_angle[i_agent] = angle
             if np.linalg.norm(delta) < 600:
                 return ThiefActions.theft(i_agent, target_i)
             return action  # Keep approaching if not close enough
@@ -85,6 +100,6 @@ class ThiefActions():
             state.agent_colors[i_agent, :] = [128, 128, 128]  
             state.agent_motivations[i_agent] -= 0.2  # Decrease motivation after failure
 
-        return ThiefActions.select_point_of_interest(i_agent)
+        return ThiefActions.selects_dense_area
     
 

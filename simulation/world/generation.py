@@ -218,7 +218,75 @@ class WorldGenerator:
 
     def generate_walls(self):
         world = self.collapse_wave()
-        return self.world_to_walls(world)
+        walls = self.world_to_walls(world)
+        self.resolve_boundary(walls)
+        return walls
+    
+    @staticmethod
+    def flood_fill(io: int, jo: int, mark: np.ndarray, mark_value: float):
+
+        N = mark.shape[0]
+        stack = [(io, jo)]
+
+        while len(stack) > 0:
+            i, j = stack.pop()
+        
+            if (
+                (i < 0) or
+                (i >= N) or
+                (j < 0) or
+                (j >= N)
+            ):
+                continue
+
+            if mark[i, j] != 0.0:
+                continue
+
+            mark[i, j] = mark_value
+            
+            for _, (di, dj) in sides:
+                ni = i + di
+                nj = j + dj
+                stack.append((ni, nj))
+
+    @classmethod
+    def create_mark(cls, walls: np.ndarray):
+        mark = np.copy(walls)
+        marker = -1
+        while True:
+            
+            non_explored_mask = mark == 0.0
+            
+            if not non_explored_mask.any():
+                break
+
+            non_explored_inds = np.where(non_explored_mask)
+            choice = np.random.randint(0, non_explored_inds[0].size)
+            i, j = non_explored_inds[0][choice], non_explored_inds[1][choice]
+
+            cls.flood_fill(i, j, mark, marker)
+            marker -= 1
+        
+        return mark
+    
+    def resolve_boundary(self, walls: np.ndarray):
+        
+        mark = self.create_mark(walls)
+        
+        closed_labels, closed_counts = np.unique(mark[mark < 0], return_counts=True)
+        if closed_counts.size == 0:
+            return mark
+        
+        main_area = closed_labels[np.argmax(closed_counts)] 
+
+        for label in closed_labels:
+
+            if main_area == label:
+                continue
+
+            walls[mark == label] = 1.0
+
+        return mark
 
 
     def collapse_wave(self) -> np.ndarray:
