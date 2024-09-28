@@ -18,12 +18,10 @@ class CitizenActions:
 
     @staticmethod
     def start_roaming(i_agent: int):
-        print("Citizen-Roaming")
         return CitizenActions.roaming()
     
     @staticmethod
     def select_poi(i_agent: int):
-        print("Citizen-Selecting POI")
         state.world.maps.navigate_agent(i_agent)
         return CitizenActions.navigate
     
