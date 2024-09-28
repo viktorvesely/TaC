@@ -24,9 +24,8 @@ class ThiefActions():
     @staticmethod
     def navigate(i_agent: int):
         # Check if the agent has reached the point of interest
-        state.agent_speed[i_agent, :] = 0.1
         state.agent_colors[i_agent, :] = [255, 0, 0]  # Set color to red for "investigating"
-        state.agent_motivations[i_agent]+= state.dTick / 100  # Increase motivation over time
+        state.agent_motivations[i_agent]+= state.dTick / 10000  # Increase motivation over time
 
         if state.world.maps.execute_path(i_agent):
             # If the point of interest is reached, select the next point of interest
@@ -76,7 +75,8 @@ class ThiefActions():
             # print(f"Thief {i_agent} approaching target {target_i} with distance {np.linalg.norm(delta)}")
             angle = np.arctan2(delta[1], delta[0])
             state.agent_angle[i_agent] = angle
-            if np.linalg.norm(delta) < 600:
+            if np.linalg.norm(delta) < 28:
+                state.agent_speed[i_agent, :] = 0.1
                 return ThiefActions.theft(i_agent, target_i)
             return action  # Keep approaching if not close enough
         
@@ -92,13 +92,13 @@ class ThiefActions():
         # 50% chance of successful theft in each case result should be stored, in state?
         success_chance = state.agent_motivations[i_agent] - random.random()
         if success_chance > 0.5:
-            print(f"Thief {i_agent} successfully stole from {target_i}")
+            #print(f"Thief {i_agent} successfully stole from {target_i}")
             state.agent_colors[i_agent, :] = [255, 255, 0]  
             state.agent_motivations[i_agent] = 0.0  # Reset motivation
         else:
-            print(f"Thief {i_agent} failed to steal from {target_i}")
+            #print(f"Thief {i_agent} failed to steal from {target_i}")
             state.agent_colors[i_agent, :] = [128, 128, 128]  
-            state.agent_motivations[i_agent] -= 0.2  # Decrease motivation after failure
+            state.agent_motivations[i_agent] = 0  # Decrease motivation after failure
 
         return ThiefActions.selects_dense_area
     

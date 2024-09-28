@@ -81,7 +81,7 @@ class CitizenActions:
         original_angle = state.agent_angle[i_agent]
         next_devation = state.t
 
-        original_speed = state.agent_speed[i_agent]
+        original_speed = state.agent_speed[i_agent, 0]
         state.agent_speed[i_agent] = 0
 
         def action(i_agent: int):
@@ -89,7 +89,6 @@ class CitizenActions:
             
             if state.t >= t_finish:
                 state.agent_speed[i_agent] = original_speed
-                print(original_speed)
                 return after_action
 
             if state.t >= next_devation:
