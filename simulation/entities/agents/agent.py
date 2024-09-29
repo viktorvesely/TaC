@@ -10,18 +10,24 @@ from .thief_actions import ThiefActions
 from .citizen_actions import CitizenActions
 
 from ...utils import Utils
+from ...events.event import MovementEvent
 from ...state import State
 
 state = State()
 
 class Agent(AgentInterface):
 
-    def __init__(self, n: int):
+    def __init__(self, n_thieves: int, n_citizens: int):
         super().__init__(None)
+
+        n = n_thieves + n_citizens
         
         state.agent_position = (np.random.random((n, 2)) -  0.5) * 300
 
         self.n = n
+        self.pos_save_period = 1000
+        self.next_t_pos_save = state.t + self.pos_save_period
+
         state.agent_velocity = np.zeros((n, 2))
         state.agent_angle = np.random.random(n) * np.pi * 2
         state.n_agents = n
@@ -29,9 +35,10 @@ class Agent(AgentInterface):
         state.agent_colors[:, :] = 255 # White color initialization
         state.agent_speed = np.full((n, 1), 0.1)
         state.agent_motivations = np.zeros((n,1)) # Array of motivations for each agent
-        state.agent_is_citizen = np.random.choice([True,False],n,p=[0.7,0.3]) #Array of booleans where True represents citizen and False represents thief
+        state.agent_is_citizen = np.full(n, True)
+        state.agent_is_citizen[n_citizens:] = False
         state.agent_heading_vec = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T
-        self.actions: list[Callable[[int], Callable]] = []    
+        self.actions: list[Callable[[int], Callable]] = []
 
         for i in range(n):
             if state.agent_is_citizen[i]:
@@ -66,7 +73,12 @@ class Agent(AgentInterface):
         # 
         state.agent_heading_vec = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T
         state.agent_velocity = state.agent_heading_vec * state.agent_speed
-        
+
+        if state.t >= self.next_t_pos_save:
+            self.next_t_pos_save = state.t + self.pos_save_period
+            MovementEvent(state.agent_position.astype(np.float32))            
+
+    
 
     def draw(self, surface: Surface):
         

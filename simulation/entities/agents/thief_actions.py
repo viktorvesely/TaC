@@ -1,6 +1,7 @@
 import random
 import numpy as np
 from ...state import State
+from ...events.event import TheftEvent
 
 state = State()
 
@@ -103,7 +104,8 @@ class ThiefActions():
         p_caught = max(p_caught_by_target, p_caught_by_others)
         
         caught = random.random() < p_caught
-        print(caught, p_caught_by_target, p_caught_by_others)
+
+        TheftEvent(caught, i_agent, target_i, vision_value, approach_cos_angle)
         if caught:
             state.agent_motivations[i_agent] -= 0.2
         else:

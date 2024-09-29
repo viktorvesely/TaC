@@ -7,6 +7,7 @@ from .state import State
 from .world.world import World
 from .utils import toMs
 from .camera import Camera
+from .events.event import EventManager
 
 
 main = __name__ == "__main__"
@@ -18,7 +19,6 @@ if main:
     state = State()
 
 def realtime_simulation():
-    
 
     paused = False
 
@@ -34,7 +34,10 @@ def realtime_simulation():
     state.last_tick = now()
     state.start_t = now()
 
-    with window:
+    event_manager = EventManager()
+    state.event_manager = event_manager
+
+    with window, event_manager:
 
         while window.running:
 

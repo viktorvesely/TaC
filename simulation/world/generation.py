@@ -1,5 +1,9 @@
 import numpy as np
 
+from ..state import State
+
+state = State()
+
 DOWN = 0
 RIGHT = 1
 UP = 2
@@ -130,15 +134,15 @@ types_to_array = [
 ]
 
 w_objects = np.array([
-    30, # vline
-    30, # hline
-    10, # corners
-    10,
-    10,
-    10,
-    10, # empty
-    10, # cross
-    8 # one
+    state.vars.generation_lines_w, # vline
+    state.vars.generation_lines_w, # hline
+    state.vars.generation_corners_w, # corners
+    state.vars.generation_corners_w,
+    state.vars.generation_corners_w,
+    state.vars.generation_corners_w,
+    state.vars.generation_empty_w, # empty
+    state.vars.generation_cross_w, # cross
+    state.vars.generation_one_w # one
 ])
 
 class WorldGenerator:

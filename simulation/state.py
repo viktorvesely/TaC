@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Type
+from dataclasses import dataclass, asdict
 
 import numpy as np
 
@@ -9,8 +10,22 @@ if TYPE_CHECKING:
     from .camera import Camera
     from .world.navigation import GoogleMaps
     from .world.grid import Grid
+    from .events.event import EventManager
 
-from .utils import ms
+@dataclass
+class Vars: 
+
+    generation_lines_w: float = 30
+    generation_corners_w: float = 10
+    generation_cross_w: float = 10
+    generation_empty_w: float = 10
+    generation_one_w: float = 8
+    
+    n_thieves: int = 4
+    n_citizens: int = 30
+
+    n_grids: int = 24
+    
 
 class Singleton(type):
     _instances = {}
@@ -28,6 +43,9 @@ class State(metaclass=Singleton):
         self.grid: Grid = None
         self.events: list[Event] = []
         self.window: Window | None = None
+        self.event_manager: EventManager | None = None
+
+        self.vars: Vars = Vars()
 
         self.n_agents: int = -1
         self.start_t: float = 0
