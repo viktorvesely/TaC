@@ -51,3 +51,4 @@ class State(metaclass=Singleton):
         self.agent_speed: np.ndarray = None
         self.agent_is_citizen: np.ndarray = None
         self.agent_motivations: np.ndarray = None
+        self.agent_heading_vec: np.ndarray = None

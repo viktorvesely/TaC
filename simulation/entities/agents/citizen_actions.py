@@ -48,15 +48,16 @@ class CitizenActions:
         roaming_type = np.random.choice(roaming_types)
 
         if roaming_type == introvert_roaming:
-            walkable_density = 1 / state.grid.density[state.grid.walkable_mask].flatten()
-            walkable_density[np.isinf(walkable_density)] = 1.5
+            walkable_density = state.grid.density[state.grid.walkable_mask].flatten().astype(float)
+            walkable_density[walkable_density == 0.0] = 0.01
+            walkable_density = 1 / walkable_density 
             walkable_inds = state.grid.grid_indicies[state.grid.walkable_mask].flatten()
 
             walkable_p = walkable_density / walkable_density.sum()
             go_to = np.random.choice(walkable_inds, p=walkable_p)
         
         elif roaming_type == extrovert_roaming:
-            walkable_density = state.grid.density[state.grid.walkable_mask].flatten()
+            walkable_density = state.grid.density[state.grid.walkable_mask].flatten().astype(float)
             walkable_inds = state.grid.grid_indicies[state.grid.walkable_mask].flatten()
 
             walkable_p = walkable_density / walkable_density.sum()

@@ -87,18 +87,27 @@ class ThiefActions():
         """
         Attempt to steal from the target.
         """
-        print("Thief- Stealing from target")
+
+        target_pos = state.agent_position[target_i]
+        from_target_to_thief = state.agent_position[i_agent] - target_pos
+
+        from_target_to_thief = from_target_to_thief / np.linalg.norm(from_target_to_thief)
+        approach_cos_angle = np.dot(from_target_to_thief, state.agent_heading_vec[target_i])
+        p_caught_by_target = approach_cos_angle / 2 + 0.5
+        p_caught_by_target = min(p_caught_by_target, 0.95)
+
+        thief_coords = state.agent_coords[i_agent, :]
+        vision_value = state.world.vision.values[thief_coords[0], thief_coords[1]]
+        p_caught_by_others = min(vision_value, 0.95)
         
-        # 50% chance of successful theft in each case result should be stored, in state?
-        success_chance = state.agent_motivations[i_agent] - random.random()
-        if success_chance > 0.5:
-            #print(f"Thief {i_agent} successfully stole from {target_i}")
-            state.agent_colors[i_agent, :] = [255, 255, 0]  
-            state.agent_motivations[i_agent] = 0.0  # Reset motivation
+        p_caught = max(p_caught_by_target, p_caught_by_others)
+        
+        caught = random.random() < p_caught
+        print(caught, p_caught_by_target, p_caught_by_others)
+        if caught:
+            state.agent_motivations[i_agent] -= 0.2
         else:
-            #print(f"Thief {i_agent} failed to steal from {target_i}")
-            state.agent_colors[i_agent, :] = [128, 128, 128]  
-            state.agent_motivations[i_agent] = 0  # Decrease motivation after failure
+            state.agent_motivations[i_agent] = 0
 
         return ThiefActions.selects_dense_area
     

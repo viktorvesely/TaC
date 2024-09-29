@@ -51,6 +51,7 @@ cdef inline void cast_ray_filling(
     double x_origin,
     double y_origin,
     int i_agent,
+    int[:] agent_types,
     double[:, :] walls,
     int[:, :] density,
     int[:, :] offsets,
@@ -75,12 +76,13 @@ cdef inline void cast_ray_filling(
     last_coords.i = -150
     last_coords.j = -237
     cdef int i_step
-    cdef double vision_strength = 0.4;
+    cdef double vision_strength = 0.2;
     cdef double vision_falloff = (vision_strength - 0.1) / (<double>n_steps)
     cdef double vision_reduction
     cdef double wall_value
     cdef int density_value, offset
     cdef int i, target_i
+    cdef int me_citizen = agent_types[i_agent]
 
 
     # Skip first step due to it being in the same spot for all rays
@@ -114,7 +116,7 @@ cdef inline void cast_ray_filling(
         # vision_reduction = 0.37 / ((<double>density_value) + 0.37) 
         # vision_strength *= vision_reduction
 
-        if wall_value == 0.0:
+        if (wall_value == 0.0) and me_citizen:
             vision_field[coords.i, coords.j] += vision_strength
 
         # Check for agents in vision
@@ -130,7 +132,7 @@ cdef inline void cast_ray_filling(
                 if target_i == i_agent:
                     continue
                 
-                if random() > vision_strength:
+                if random() > min(vision_strength + 0.5, 1.0):
                     continue
 
                 # TODO target_i can be added twice (when two rays intersect the same cell)
@@ -148,6 +150,7 @@ cdef inline void cast_ray_filling(
 cdef void _generate_vision_field(
     double[:, :] agent_position,
     double[:] agent_angles,
+    int[:] agent_types,
     double[:, :] walls,
     int[:, :] density,
     int[:, :] offsets,
@@ -198,6 +201,7 @@ cdef void _generate_vision_field(
                 agent_x,
                 agent_y,
                 i_agent,
+                agent_types,
                 walls,
                 density,
                 offsets,
@@ -215,6 +219,7 @@ cdef void _generate_vision_field(
 def generate_vision_field(
     double[:, :] agent_position not None,
     double[:] agent_angles not None,
+    int[:] agent_types not None,
     double[:, :] walls not None,
     int[:, :] density not None,
     int[:, :] offsets not None,
@@ -239,6 +244,7 @@ def generate_vision_field(
     _generate_vision_field(
         agent_position,
         agent_angles,
+        agent_types,
         walls,
         density,
         offsets,

@@ -63,6 +63,7 @@ class Vision:
         self.values = generate_vision_field(
             state.agent_position,
             state.agent_angle,
+            state.agent_is_citizen.astype(np.int32),
             self.grid.walls,
             self.grid.density,
             self.grid.offsets,

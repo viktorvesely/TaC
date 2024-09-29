@@ -9,6 +9,7 @@ from .agent_actions import AgentActions
 from .thief_actions import ThiefActions
 from .citizen_actions import CitizenActions
 
+from ...utils import Utils
 from ...state import State
 
 state = State()
@@ -29,6 +30,7 @@ class Agent(AgentInterface):
         state.agent_speed = np.full((n, 1), 0.1)
         state.agent_motivations = np.zeros((n,1)) # Array of motivations for each agent
         state.agent_is_citizen = np.random.choice([True,False],n,p=[0.7,0.3]) #Array of booleans where True represents citizen and False represents thief
+        state.agent_heading_vec = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T
         self.actions: list[Callable[[int], Callable]] = []    
 
         for i in range(n):
@@ -62,17 +64,17 @@ class Agent(AgentInterface):
             next_action = action(i)
             self.actions[i] = next_action
         # 
-        state.agent_velocity = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T * state.agent_speed
+        state.agent_heading_vec = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T
+        state.agent_velocity = state.agent_heading_vec * state.agent_speed
         
 
     def draw(self, surface: Surface):
         
-        additive = np.ones((self.n, 3))
-        additive[:, :2] = state.agent_position
-    
-        projected = state.camera.worldToScreen.m @ additive.T
-        projected = projected[:2, :].T
+        forward_vec =  state.agent_position + state.agent_heading_vec * 12
+        projected = Utils.vectorized_projection(state.camera.worldToScreen.m, state.agent_position)
+        forward_vec = Utils.vectorized_projection(state.camera.worldToScreen.m, forward_vec)
 
         # Draw agent as circle at position
         for i_agent, position in enumerate(projected):
             pygame.draw.circle(surface, state.agent_colors[i_agent, :], position, 10 * state.camera.zoom)
+            pygame.draw.line(surface, (255, 255, 255), position, forward_vec[i_agent], width=int(3 * state.camera.zoom))
