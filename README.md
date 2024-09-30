@@ -34,6 +34,15 @@ This project uses [Poetry](https://python-poetry.org/) for dependency management
 
    This will automatically create a virtual environment and install all dependencies listed in the `pyproject.toml` file.
 
+3. Compile the cython files
+
+    ```bash
+   Go to simulation/world/c_vision
+      run python compile_vision build_ext --inplace
+   Go to simulation/world/c_collision
+      run python compile_collisions build_ext --inplace
+
+   ```
 ### Running the Project
 
 1. Activate the virtual environment:
@@ -43,20 +52,5 @@ This project uses [Poetry](https://python-poetry.org/) for dependency management
 
 2. Run the project:
    ```bash
-   python <main-script>.py
+   python -m simulation.main
    ```
-   Replace `<main-script>.py` with the name of the main script or entry point for your project.
-
-### Adding Dependencies
-
-To add new dependencies to the project, use the following command:
-```bash
-poetry add <package-name>
-```
-
-### Updating Dependencies
-
-If you need to update the dependencies:
-```bash
-poetry update
-```
