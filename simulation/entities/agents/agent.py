@@ -22,7 +22,7 @@ class Agent(AgentInterface):
 
         n = n_thieves + n_citizens
         
-        state.agent_position = (np.random.random((n, 2)) -  0.5) * 300
+        state.agent_position = np.zeros((n, 2))
 
         self.n = n
         self.pos_save_period = 1000
@@ -88,5 +88,5 @@ class Agent(AgentInterface):
 
         # Draw agent as circle at position
         for i_agent, position in enumerate(projected):
-            pygame.draw.circle(surface, state.agent_colors[i_agent, :], position, 10 * state.camera.zoom)
+            pygame.draw.circle(surface, state.agent_colors[i_agent, :], position, state.vars.agent_size * state.camera.zoom)
             pygame.draw.line(surface, (255, 255, 255), position, forward_vec[i_agent], width=int(3 * state.camera.zoom))

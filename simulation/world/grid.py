@@ -5,6 +5,7 @@ import pygame
 from ..entities.entity import Entity
 from ..entities.agents.agent import Agent
 from ..state import State
+from .c_collision.collision import resolve_collision
 
 state = State() # Singleton for accessing state of game or simulation
 
@@ -36,9 +37,17 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
         self.density: np.ndarray = np.zeros_like(self.walls, dtype=np.int32)
         self.offsets: np.ndarray = np.zeros_like(self.walls, dtype=np.int32)
         self.homogenous_indicies: np.ndarray | None = None 
-        self.register_agent_coords()
+        
 
-    
+    def generate_agent_positions(self) -> tuple[np.ndarray, np.ndarray]:
+        self.register_agent_coords()
+        spawn_mask = np.isclose(self.walls, 0.0)
+        grid_indicies = self.grid_indicies[spawn_mask].flatten()
+        agent_coords = np.random.choice(grid_indicies, size=state.agent_position.shape[0])
+        agent_coords = np.array(agent_coords.tolist(), dtype=np.int32)
+        return agent_coords, self.vectorized_cell_to_world(agent_coords, WPOS_MIDDLE)
+
+        
 
     def world_pos_to_cell_pos(self, pos: np.ndarray) -> tuple[int, int]: # World coordinates to grid cell coordinates conversion
         pos = pos - self.world_TL
@@ -51,6 +60,28 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
             out = out + self._tomid
         
         return out
+    
+    def get_agents_around_cell(self, coords: tuple[int, int]) -> np.ndarray:
+        
+        agents = []
+
+        for di in range(-1, 2):
+            for dj in range(-1, 2):
+                
+                nc = (coords[0] + di, coords[1] + dj)
+
+                if (nc[0] < 0) or (nc[0] >= self.ngrids) or (nc[1] < 0) or (nc[1] >= self.ngrids):
+                    continue
+
+                n_agents = self.density[nc[0], nc[1]]
+                offset = self.offsets[nc[0], nc[1]]
+
+                for i in range(n_agents):
+                    target_i = self.homogenous_indicies[offset + i]
+                    agents.append(target_i)
+        
+        return np.array(agents)
+         
     
     def vectorized_world_to_cell(self, positions: np.ndarray) -> np.ndarray: # Multiple world positions to grid cell positions
         """
@@ -196,6 +227,8 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
         ent_pos[collide_mask] = collision_closest_points
         state.agent_position = ent_pos
 
+        
+
     def register_agent_coords(self):
 
         agent_coords = state.agent_coords if state.agent_coords is not None else self.vectorized_world_to_cell(state.agent_position)
@@ -211,6 +244,19 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
 
     
     def tick(self):
+
+        resolve_collision(
+            state.agent_position,
+            state.agent_velocity,
+            self.world_TL,
+            self.density,
+            self.offsets,
+            self.homogenous_indicies,
+            self.size,
+            self.walls.shape[0],
+            self.walls.shape[1],
+            state.vars.agent_size
+        )
 
         state.agent_position = np.clip(state.agent_position, *(self.world_size + np.array([10, -10])))
         self.handle_wall_collision()

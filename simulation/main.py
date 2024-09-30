@@ -1,9 +1,12 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 from time import sleep, perf_counter_ns
 import numpy as np
 import pygame
+import random
 
 from .window import Window
-from .state import State
+from .state import State, Vars
 from .world.world import World
 from .utils import toMs
 from .camera import Camera
@@ -15,8 +18,8 @@ main = __name__ == "__main__"
 def now():
     return toMs(perf_counter_ns())
 
-if main:
-    state = State()
+
+state = State()
 
 def realtime_simulation():
 
@@ -56,7 +59,7 @@ def realtime_simulation():
     print(state.t - state.start_t)
 
 def paused_simulation_cycle(window: Window, camera: Camera, world: World):
-    
+
     d = state.dTick_target
     state.t = now()  
 
@@ -87,9 +90,15 @@ def realtime_simulation_cycle(window: Window, camera: Camera, world: World):
 
     
 
-def experiment_simulation(desired_t_s: float):
+def experiment_simulation(config: Vars, desired_t_s: float):
 
-    import tqdm
+    state.vars = config
+
+    np.random.seed(int.from_bytes(os.urandom(4), byteorder='little'))
+    random.seed(int.from_bytes(os.urandom(4), byteorder='little'))
+
+    event_manager = EventManager()
+    state.event_manager = event_manager
 
     state.window = Window()
 
@@ -101,25 +110,19 @@ def experiment_simulation(desired_t_s: float):
     state.last_tick = state.start_t
     end_t = (desired_t_s * 1000) + state.start_t
 
-    n_steps: int = int((end_t - state.start_t) / state.dTick_target) + 1
-
-    actual_t = now()
-    with tqdm.tqdm(total=n_steps) as pbar:
+    with event_manager:
         while state.t < end_t:
             d = state.dTick_target
             state.t += d
             state.dTick = d
             world.tick()
             state.last_tick = state.t
-            pbar.update()
 
-    print(now() - actual_t)
 
 
 if main:
 
     realtime_simulation()
-
 
     if False:
         import pstats, cProfile

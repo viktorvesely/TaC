@@ -19,6 +19,12 @@ class PointsOfInterests:
         return tuple(self.coords[rand_i, :])
         
 
+    def register_existing(self):
+        
+        poi_mask = np.isclose(self.grid.walls, 2.0)
+        self.coords = np.array(np.where(poi_mask)).T
+        
+
     def add_random(self, N: int = 1):
 
         empty_mask = np.isclose(self.grid.walls, 0)

@@ -1,0 +1,1 @@
+py -3.12 compile_collision.py build_ext --inplace

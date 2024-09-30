@@ -38,7 +38,7 @@ class GoogleMaps:
     def heuristic(self, source: tuple[int, int], destination: tuple[int, int]) -> float:
         return abs(source[0] - destination[0]) + abs(source[1] - destination[1])
 
-    def execute_path(self, i_agent: int) -> bool:
+    def execute_path(self, i_agent: int, offset: np.ndarray | None = None) -> bool:
         """
         Updates the agent's path and orientation based on its current position.
         Args:
@@ -55,6 +55,8 @@ class GoogleMaps:
 
         agent_coords: np.ndarray = state.agent_coords[i_agent, :] 
         path = self.paths[i_agent]
+        if path is None:
+            return True
         nex_step = path[0, :]
 
         goal_coord = path[-1, :]
@@ -64,11 +66,14 @@ class GoogleMaps:
             self.paths[i_agent] = None
             return True
 
-        if np.allclose(agent_coords, nex_step):
+        if (agent_coords[0] == nex_step[0]) and (agent_coords[1] == nex_step[1]):
             self.paths[i_agent] = path[1:, :]
             nex_step = path[1, :]
 
         cell_pos = self.grid.cell_pos_to_world_pos(nex_step, 1)
+        if offset is not None:
+            cell_pos += offset
+
         delta = cell_pos - agent_pos
         angle = np.arctan2(delta[1], delta[0])
         state.agent_angle[i_agent] = angle
@@ -80,18 +85,6 @@ class GoogleMaps:
         new_path = self.navigate(tuple(agent_coords), to, heuristic)
         self.paths[i_agent] = new_path
 
-    def tick(self):
-        return
-        agents_coords = self.grid.vectorized_world_to_cell(state.agent_position)
-        for i_agent, path in enumerate(self.paths):
-
-            if path is not None:
-                self.execute_path(i_agent, agents_coords[i_agent])
-                continue
-            
-            rand_poi_i = np.random.choice(self.pois.coords.shape[0])
-            new_path = self.navigate(tuple(agents_coords[i_agent, :]), tuple(self.pois.coords[rand_poi_i]))
-            self.paths[i_agent] = new_path
         
     def get_target_poi_index(self, i_agent: int) -> int:
         return 0

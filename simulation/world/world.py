@@ -24,11 +24,12 @@ class World(WorldInterface):             # Concrete implementation of WorldInter
         self.grid: Grid = Grid(self.generator.generate_walls())
         self.vision: Vision = Vision(self.grid)
         self.pois: PointsOfInterests = PointsOfInterests(self.grid)
-        self.pois.add_random(5)
+        self.pois.register_existing()
         self.maps = GoogleMaps(self.grid, self.pois)
-        
+
         state.maps = self.maps
         state.grid = self.grid
+        state.agent_coords, state.agent_position = self.grid.generate_agent_positions()
             
     
     def add_agent(self, agent: Agent):  # Add agents to world

@@ -9,10 +9,12 @@ state = State()
 introvert_roaming = 0
 extrovert_roaming = 1
 roaming_types = (introvert_roaming, extrovert_roaming)
+roaming_weights = np.array([4, 1])
+roaming_weights = roaming_weights / roaming_weights.sum()
 
 class CitizenActions:
     
-    weigths = np.array([4, 4, 0])
+    weigths = np.array([15, 15, 1])
     weigths = weigths / weigths.sum()
     
     @staticmethod
@@ -25,27 +27,33 @@ class CitizenActions:
     
     @staticmethod
     def select_poi(i_agent: int):
-
         to = state.world.pois.select_random()
-
-        state.maps.navigate_agent(i_agent, to)
+        state.maps.navigate_agent(i_agent, to, heuristic=state.maps.heuristic_avoid_dense)
         return CitizenActions.navigate
     
     @staticmethod
     def navigate(i_agent: int):
-        if state.maps.execute_path(i_agent):
-            return CitizenActions.wait_and_look(
-                i_agent,
-                np.random.randint(5_000, 15_000),
-                np.pi / 6, CitizenActions.select_action
-            )
-        return CitizenActions.navigate
+
+        offset = np.random.random(2) * (state.grid.size / 2.2)
+
+        def action(i_agent: int):
+            if state.maps.execute_path(i_agent, offset):
+                return CitizenActions.wait_and_look(
+                    i_agent,
+                    np.random.randint(5_000, 15_000),
+                    np.pi / 6, CitizenActions.select_action
+                )
+            
+            state.agent_velocity[i_agent, :] += np.random.random(2) * 0.06
+            return action
+    
+        return action
     
 
     @staticmethod
     def start_roaming(i_agent: int):
 
-        roaming_type = np.random.choice(roaming_types)
+        roaming_type = np.random.choice(roaming_types, p=roaming_weights)
 
         if roaming_type == introvert_roaming:
             walkable_density = state.grid.density[state.grid.walkable_mask].flatten().astype(float)
@@ -100,39 +108,42 @@ class CitizenActions:
 
         return action
 
-    @staticmethod
-    def stop_at_poi(i_agent: int):
-        state.agent_speed[i_agent,:] = 0  # Stop the agent
-        # Define how long the agent will stop at the POI
-        stop_duration = np.random.normal(loc=5, scale=1)  # Stop for random time
-        finish_time = state.t + stop_duration
-        
-        # Get the attraction factor of the POI (defined between 0 and 1)
-        # attraction_factor = state.world.pois.get_poi_attraction_factor(i_agent)
-
-        # if np.random.rand() < attraction_factor: # decide whether to look at POI or not
-        #     poi_position = state.world.maps.get_poi_position(i_agent)
-        #     direction_to_poi = poi_position - state.agent_position[i_agent]
-        #     state.agent_angle[i_agent] = np.arctan2(direction_to_poi[1], direction_to_poi[0])
-        # else: # Look in random direction
-        #     state.agent_angle[i_agent] = np.random.uniform(0, 2 * np.pi)
-        
-        def action(i_agent: int): 
-            # Continue stopping until the stop duration is reached
-            if state.t >= finish_time:
-                return CitizenActions.move_away  # Move away from POI
-            
-            return action  # Keep stopping at the POI
 
     @staticmethod
     def social_interaction(i_agent: int):
-        engagement_probability = 0.5  # Define the probability of engaging in social interaction
-        # Get the positions of all citizens within a range defined as "nearby"
-        in_vision = state.agents_in_vision[i_agent, :]
-        for agent in in_vision:
-            if np.random.rand() < engagement_probability:  # Define engagement_probability
-                # Both citizens agree to interact
-                return CitizenActions.stop_at_citizen(i_agent, agent)  # You may want to adjust this to reflect a stopping interaction
+
+        agents_inds = state.grid.get_agents_around_cell(state.agent_coords[i_agent, :])
+        engagement_probability = 0.3
+
+        if agents_inds.size < 2:
+            return CitizenActions.wait_and_look(i_agent, 3_000, random.random() * (np.pi / 4), CitizenActions.select_action)
+
+
+        citizens_mask = state.agent_is_citizen[agents_inds.tolist()]
+
+        interaction_mask = np.random.choice(
+            [True, False],
+            p=[engagement_probability, 1 - engagement_probability],
+            size = agents_inds.size
+        )
+
+        interact_inds = agents_inds[interaction_mask & citizens_mask]
+
+        if interact_inds.size < 2:
+            return CitizenActions.wait_and_look(i_agent, 3_000, random.random() * (np.pi / 4), CitizenActions.select_action)
+
+
+        positions = state.agent_position[interact_inds.tolist(), :]
+        center = np.mean(positions, axis=0)
+        deltas = center - positions
+        angles = np.arctan2(deltas[:, 1], deltas[:, 0])
+
+        for other_i, angle in zip(interact_inds, angles, strict=True):
+
+            state.agent_angle[other_i] = angle
+            state.world.agents.actions[other_i] = CitizenActions.wait_and_look(other_i, 10_000, 0, CitizenActions.select_action)
+
+        return state.world.agents.actions[i_agent]
 
     @staticmethod
     def stop_at_citizen(i_agent: int, target_agent: int):
