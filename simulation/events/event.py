@@ -90,8 +90,8 @@ class EventManager:
         self.monitoring = True
         rand_id = random.randint(10_000, 100_000)
         now = datetime.datetime.now()
-        self.folder = Utils.experiments_path() / f"{now.strftime("%Y-%m-%d_%H-%M-%S")}_{state.vars.experiment_name}_{rand_id}"
-        self.folder.mkdir()
+        self.folder = Utils.experiments_path() / f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_{rand_id}"
+        self.folder.mkdir(parents=True)
 
         return self
     
