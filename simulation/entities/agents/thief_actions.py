@@ -52,12 +52,18 @@ class ThiefActions():
             if not state.agent_is_citizen[target_i]:
                 continue
 
-            target_coords = state.agent_coords[target_i, :]
-            factor1 = -state.world.vision.values[target_coords[0], target_coords[1]]
-            factor2 = state.agent_motivations[i_agent]
+            target_pos = state.agent_coords[target_i]
+            from_target_to_thief = state.agent_position[i_agent] - target_pos
+
+            #normalize distance
+            from_target_to_thief = from_target_to_thief / np.linalg.norm(from_target_to_thief)
+            approach_cos_angle = np.dot(from_target_to_thief,state.agent_heading_vec[target_i])
+            p_caught_by_target = approach_cos_angle /2 + 0.5 # ?
+
+            factor1 = state.agent_motivations[i_agent]
 
 
-            if (factor1 + factor2) > 0.5:
+            if (factor1 + p_caught_by_target) > 1:
                 return ThiefActions.approach_target(i_agent, target_i)  # Start approaching the selected target
             
         return ThiefActions.navigate  
