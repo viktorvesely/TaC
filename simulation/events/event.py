@@ -65,6 +65,26 @@ class MotivationEvent(Event):
     def construct_dataframe(cls, events) -> pd.DataFrame:
         return super().construct_dataframe(events, "current", "delta", "thief_i", "reason")
 
+
+class VisionEvent(Event):
+
+    def __init__(self, vision: np.ndarray) -> None:
+        super().__init__()
+
+        self.vision = vision
+
+    @classmethod
+    def construct_dataframe(cls, events, *keys) -> pd.DataFrame:
+        
+        dfs = []
+
+        for event in events:
+            df = pd.DataFrame(event.vision)
+            df["t"] = event.t
+            dfs.append(df)
+
+        return pd.concat(dfs, ignore_index=True)
+
 class MovementEvent(Event):
 
     def __init__(self, agent_position: np.ndarray) -> None:

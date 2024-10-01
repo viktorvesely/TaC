@@ -54,7 +54,7 @@ class Agent(AgentInterface):
                 state.agent_colors[i, 1] = 0
                 state.agent_colors[i, 2] = 0
                 # setting the thief motivation to 0.5
-                state.agent_motivations[i,0] = 0.5
+                state.agent_motivations[i,0] = 0
                 self.actions.append(ThiefActions.selects_dense_area)
         #self.close_range = 0.1
 
@@ -68,7 +68,7 @@ class Agent(AgentInterface):
         
         super().tick()
 
-        factor = 0.0003
+        factor = 0.0006
         bias = 1.4 # Above 2 means more toward gaining motivation bellow to towards loosing NOT LINEAR!!!
         thiefs_coords = state.agent_coords[~state.agent_is_citizen, :]
         thiefs_vision_values = state.world.vision.values[tuple(thiefs_coords.T)]
@@ -81,8 +81,6 @@ class Agent(AgentInterface):
         # 
         state.agent_heading_vec = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T
         state.agent_velocity = state.agent_heading_vec * state.agent_speed
-
-
 
         if state.t >= self.next_t_pos_save:
             self.next_t_pos_save = state.t + self.pos_save_period

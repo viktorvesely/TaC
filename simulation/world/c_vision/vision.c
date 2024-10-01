@@ -19666,27 +19666,27 @@ static CYTHON_INLINE void __pyx_f_6vision_cast_ray_filling(double __pyx_v_ray_an
  *     last_coords.i = -150
  *     last_coords.j = -237             # <<<<<<<<<<<<<<
  *     cdef int i_step
- *     cdef double vision_strength = 0.2;
+ *     cdef double vision_strength = 0.1;
  */
   __pyx_v_last_coords.j = -237;
 
   /* "vision.pyx":79
  *     last_coords.j = -237
  *     cdef int i_step
- *     cdef double vision_strength = 0.2;             # <<<<<<<<<<<<<<
- *     cdef double vision_falloff = (vision_strength - 0.1) / (<double>n_steps)
+ *     cdef double vision_strength = 0.1;             # <<<<<<<<<<<<<<
+ *     cdef double vision_falloff = (vision_strength - 0.01) / (<double>n_steps)
  *     cdef double vision_reduction
  */
-  __pyx_v_vision_strength = 0.2;
+  __pyx_v_vision_strength = 0.1;
 
   /* "vision.pyx":80
  *     cdef int i_step
- *     cdef double vision_strength = 0.2;
- *     cdef double vision_falloff = (vision_strength - 0.1) / (<double>n_steps)             # <<<<<<<<<<<<<<
+ *     cdef double vision_strength = 0.1;
+ *     cdef double vision_falloff = (vision_strength - 0.01) / (<double>n_steps)             # <<<<<<<<<<<<<<
  *     cdef double vision_reduction
  *     cdef double wall_value
  */
-  __pyx_t_1 = (__pyx_v_vision_strength - 0.1);
+  __pyx_t_1 = (__pyx_v_vision_strength - 0.01);
   if (unlikely(((double)__pyx_v_n_steps) == 0)) {
     #ifdef WITH_THREAD
     PyGILState_STATE __pyx_gilstate_save = __Pyx_PyGILState_Ensure();

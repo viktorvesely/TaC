@@ -24,12 +24,12 @@ if __name__ == "__main__":
     import numpy as np
 
 
-    source = Vars(experiment_name="thieves_motivation_and_introvert_granular")
+    source = Vars(experiment_name="DENSE_VISION_mot_change_approach_vis_value")
     configs = vary(
         source,
         name="generation_empty_w",
-        values=np.linspace(1, 100, num=60),
-        variations=10
+        values=np.linspace(1, 100, num=20),
+        variations=5    
     )
 
 

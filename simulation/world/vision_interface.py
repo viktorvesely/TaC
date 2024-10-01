@@ -4,6 +4,7 @@ from pygame import Rect, Surface
 import pygame
 from ..state import State
 from .grid import Grid
+from ..events.event import VisionEvent
 from .c_vision.vision import generate_vision_field
 
 state = State()
@@ -21,6 +22,8 @@ class Vision:
         self.values = np.zeros_like(self.grid.walls)
         self.max_targets_per_agent: int = 5
         state.agents_in_vision = np.full((state.n_agents, self.max_targets_per_agent), -1, dtype=np.int32)
+
+        self.next_vision_event = state.t
 
 
     def draw_vision_map(self, surface: Surface):
@@ -59,6 +62,8 @@ class Vision:
 
     # Update vision field
     def tick(self):
+
+
         state.agents_in_vision = np.full((state.n_agents, self.max_targets_per_agent), -1, dtype=np.int32)
         self.values = generate_vision_field(
             state.agent_position,
@@ -75,6 +80,12 @@ class Vision:
             self.fov,
             self.n_rays
         )
+
+        if state.t >= self.next_vision_event:
+            VisionEvent(self.values)
+            self.next_vision_event = state.t + 1_000
+
+
 
 
     
