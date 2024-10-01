@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING, Any, Type
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -26,7 +26,6 @@ class Vars:
     n_thieves: int = 12
     n_citizens: int = 200
     agent_size: float = 10
-
 
     n_grids: int = 36
     

@@ -5,12 +5,13 @@ import pandas as pd
 from pathlib import Path
 import datetime
 import random
+import json
+from dataclasses import asdict
 
 from ..state import State
 from ..utils import Utils
 
 state = State()
-
 
 class Event:
 
@@ -90,7 +91,7 @@ class EventManager:
         self.monitoring = True
         rand_id = random.randint(10_000, 100_000)
         now = datetime.datetime.now()
-        self.folder = Utils.experiments_path() / f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_{rand_id}"
+        self.folder = Utils.experiments_path() / f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_{state.vars.experiment_name}_{rand_id}"
         self.folder.mkdir(parents=True)
 
         return self
@@ -102,4 +103,7 @@ class EventManager:
         for EventClass, events in self.events.items():
             df = EventClass.construct_dataframe(events)
             df.to_parquet(self.folder / f"{EventClass.__name__}.parquet", index=False)
+
+        with open(self.folder / "config.json", "w", encoding="utf-8") as f:
+            json.dump(asdict(state.vars), f)
         

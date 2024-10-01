@@ -2,6 +2,7 @@ from typing import Callable
 import numpy as np
 import heapq
 import time
+import math
 
 from .grid import Grid
 from .poi import PointsOfInterests
@@ -28,7 +29,7 @@ class GoogleMaps:
     def __init__(self, grid: Grid, pois: PointsOfInterests) -> None:
         self.grid = grid
         self.pois = pois
-        self.paths = [None for _ in range(state.agent_position.shape[0])]
+        self.paths: list[list[tuple[int, int]] | None] = [None for _ in range(state.agent_position.shape[0])]
 
 
     def heuristic_avoid_dense(self, source: tuple[int, int], destination: tuple[int, int]) -> float:
@@ -38,44 +39,35 @@ class GoogleMaps:
     def heuristic(self, source: tuple[int, int], destination: tuple[int, int]) -> float:
         return abs(source[0] - destination[0]) + abs(source[1] - destination[1])
 
-    def execute_path(self, i_agent: int, offset: np.ndarray | None = None) -> bool:
-        """
-        Updates the agent's path and orientation based on its current position.
-        Args:
-            i_agent (int): The index of the agent to update.
-        Returns:
-            bool: True if the agent has reached its goal, False otherwise.
-        The function performs the following steps:
-        1. Retrieves the agent's current coordinates and path.
-        2. Checks if the agent is within one unit of its goal. If so, clears the path and returns True.
-        3. If the agent is at the next step in its path, updates the path to remove the completed step.
-        4. Calculates the next step's world position and the delta to the agent's current position.
-        5. Computes the angle the agent needs to face based on the delta and updates the agent's state.
-        """
+    def execute_path(self, i_agent: int) -> bool:
 
-        agent_coords: np.ndarray = state.agent_coords[i_agent, :] 
+        agent_coords = state.agent_coords[i_agent, :].tolist()
+
         path = self.paths[i_agent]
         if path is None:
             return True
-        nex_step = path[0, :]
+        
+        next_step = path[0]
+        goal_coord = path[-1]
 
-        goal_coord = path[-1, :]
-        agent_pos = state.agent_position[i_agent, :]
-
-        if np.max(np.abs(agent_coords - goal_coord)) <= 1:
+        max_delta = max(abs(agent_coords[0] - goal_coord[0]), abs(agent_coords[1] - goal_coord[1]))
+        if max_delta <= 1:
             self.paths[i_agent] = None
             return True
 
-        if (agent_coords[0] == nex_step[0]) and (agent_coords[1] == nex_step[1]):
-            self.paths[i_agent] = path[1:, :]
-            nex_step = path[1, :]
+        if (agent_coords[0] == next_step[0]) and (agent_coords[1] == next_step[1]):
+            self.paths[i_agent].pop(0)
+            next_step = path[0]
 
-        cell_pos = self.grid.cell_pos_to_world_pos(nex_step, 1)
-        if offset is not None:
-            cell_pos += offset
+        #cell_pos = self.grid.cell_pos_to_world_pos(next_step, 1)
+        cell_pos = (
+            next_step[1] * self.grid.size + self.grid.world_TL[0] + self.grid._tomid[0],
+            next_step[0] * self.grid.size + self.grid.world_TL[1] + self.grid._tomid[1]
+        )
 
-        delta = cell_pos - agent_pos
-        angle = np.arctan2(delta[1], delta[0])
+        # delta = cell_pos - agent_pos
+        agent_pos = state.agent_position[i_agent, :].tolist()
+        angle = math.atan2(cell_pos[1] - agent_pos[1], cell_pos[0] - agent_pos[0])
         state.agent_angle[i_agent] = angle
 
         return False
@@ -129,7 +121,7 @@ class GoogleMaps:
                     current = came_from[current]
                 path.append(start)
                 path.reverse()
-                return np.array(path)
+                return path
             
             closed_set.add(current)
             

@@ -34,17 +34,14 @@ class CitizenActions:
     @staticmethod
     def navigate(i_agent: int):
 
-        offset = np.random.random(2) * (state.grid.size / 2.2)
-
         def action(i_agent: int):
-            if state.maps.execute_path(i_agent, offset):
+            if state.maps.execute_path(i_agent):
                 return CitizenActions.wait_and_look(
                     i_agent,
-                    np.random.randint(5_000, 15_000),
+                    random.randint(5_000, 15_000),
                     np.pi / 6, CitizenActions.select_action
                 )
             
-            state.agent_velocity[i_agent, :] += np.random.random(2) * 0.06
             return action
     
         return action

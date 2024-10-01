@@ -1,11 +1,12 @@
 from multiprocessing import Pool
 from dataclasses import replace
+import signal
 
 from .state import Vars
 from .main import experiment_simulation
 
 def boot_experiment(config: Vars):
-    experiment_simulation(config, desired_t_s=10)
+    experiment_simulation(config, desired_t_s=120)
 
 
 def vary(source: Vars, name: str, values: list, variations: int) -> list[Vars]:
@@ -23,15 +24,18 @@ if __name__ == "__main__":
     import numpy as np
 
 
-    source = Vars(experiment_name="test")
+    source = Vars(experiment_name="empty_1-50_20_10")
     configs = vary(
         source,
         name="generation_empty_w",
-        values=np.linspace(5, 50, num=5),
-        variations=1
+        values=np.linspace(1, 50, num=20),
+        variations=10
     )
 
+
     with Pool(4) as p, tqdm.tqdm(total=len(configs)) as pbar:
-        for _ in p.imap_unordered(boot_experiment, configs):
-            pbar.update()
-        
+        try:
+            for _ in p.imap_unordered(boot_experiment, configs):
+                pbar.update()
+        except KeyboardInterrupt:
+            ...

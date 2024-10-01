@@ -114,7 +114,7 @@ def experiment_simulation(config: Vars, desired_t_s: float):
         while state.t < end_t:
             d = state.dTick_target
             state.t += d
-            state.dTick = d
+            state.dTick = d 
             world.tick()
             state.last_tick = state.t
 
@@ -122,14 +122,14 @@ def experiment_simulation(config: Vars, desired_t_s: float):
 
 if main:
 
-    realtime_simulation()
-
     if False:
+        realtime_simulation()
+    else:
         import pstats, cProfile
 
         # Use the with statement to profile the function and save the results to a file
         with cProfile.Profile() as profiler:
-            realtime_simulation()
+            experiment_simulation(Vars(), desired_t_s=120)
 
         # Create a Stats object from the saved profile results
         stats = pstats.Stats(profiler)
