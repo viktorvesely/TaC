@@ -122,7 +122,7 @@ def experiment_simulation(config: Vars, desired_t_s: float):
 
 if main:
 
-    if False:
+    if True:
         realtime_simulation()
     else:
         import pstats, cProfile
