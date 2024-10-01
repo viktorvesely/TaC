@@ -20,14 +20,14 @@ class Vars:
     generation_lines_w: float = 30
     generation_corners_w: float = 10
     generation_cross_w: float = 10
-    generation_empty_w: float = 25
+    generation_empty_w: float = 20
     generation_one_w: float = 8
     
     n_thieves: int = 12
-    n_citizens: int = 200
+    n_citizens: int = 120
     agent_size: float = 10
 
-    n_grids: int = 36
+    n_grids: int = 48
     
     
 

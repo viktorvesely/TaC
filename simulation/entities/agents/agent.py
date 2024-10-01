@@ -12,6 +12,7 @@ from .citizen_actions import CitizenActions
 from ...utils import Utils
 from ...events.event import MovementEvent
 from ...state import State
+import matplotlib as mpl
 
 state = State()
 
@@ -67,6 +68,13 @@ class Agent(AgentInterface):
         
         super().tick()
 
+        factor = 0.0003
+        bias = 1.4 # Above 2 means more toward gaining motivation bellow to towards loosing NOT LINEAR!!!
+        thiefs_coords = state.agent_coords[~state.agent_is_citizen, :]
+        thiefs_vision_values = state.world.vision.values[tuple(thiefs_coords.T)]
+        state.agent_motivations[~state.agent_is_citizen, :] += ((factor *(1 - thiefs_vision_values) - (factor / bias)) * state.dTick)[:, np.newaxis]
+        state.agent_motivations = np.clip(state.agent_motivations, 0.0, 1.0) 
+
         for i, action in enumerate(self.actions):
             next_action = action(i)
             self.actions[i] = next_action
@@ -74,9 +82,11 @@ class Agent(AgentInterface):
         state.agent_heading_vec = np.vstack((np.cos(state.agent_angle), np.sin(state.agent_angle))).T
         state.agent_velocity = state.agent_heading_vec * state.agent_speed
 
+
+
         if state.t >= self.next_t_pos_save:
             self.next_t_pos_save = state.t + self.pos_save_period
-            MovementEvent(state.agent_position.astype(np.float32))            
+            # MovementEvent(state.agent_position.astype(np.float32))            
 
     
 
@@ -85,6 +95,13 @@ class Agent(AgentInterface):
         forward_vec =  state.agent_position + state.agent_heading_vec * 12
         projected = Utils.vectorized_projection(state.camera.worldToScreen.m, state.agent_position)
         forward_vec = Utils.vectorized_projection(state.camera.worldToScreen.m, forward_vec)
+
+        t_colors = state.agent_motivations[~state.agent_is_citizen]
+        t_colors = np.squeeze(t_colors)
+        t_colors = mpl.colormaps["viridis"](t_colors) * 255
+        t_colors = t_colors[:, :3].astype(np.int32)
+        state.agent_colors[~state.agent_is_citizen, :] = t_colors
+
 
         # Draw agent as circle at position
         for i_agent, position in enumerate(projected):

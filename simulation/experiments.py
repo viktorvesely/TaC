@@ -24,16 +24,16 @@ if __name__ == "__main__":
     import numpy as np
 
 
-    source = Vars(experiment_name="empty_1-50_20_10")
+    source = Vars(experiment_name="thieves_motivation_and_introvert_granular")
     configs = vary(
         source,
         name="generation_empty_w",
-        values=np.linspace(1, 50, num=20),
+        values=np.linspace(1, 100, num=60),
         variations=10
     )
 
 
-    with Pool(4) as p, tqdm.tqdm(total=len(configs)) as pbar:
+    with Pool(8) as p, tqdm.tqdm(total=len(configs)) as pbar:
         try:
             for _ in p.imap_unordered(boot_experiment, configs):
                 pbar.update()

@@ -5,6 +5,7 @@ import numpy as np
 import pygame
 import random
 
+
 from .window import Window
 from .state import State, Vars
 from .world.world import World

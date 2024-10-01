@@ -88,6 +88,9 @@ cdef inline void cast_ray_filling(
     # Skip first step due to it being in the same spot for all rays
     for i_step in range(1, n_steps + 1):
 
+        if vision_strength < 0.01:
+            break
+
         position[0] = x_origin + delta[0] * (<double>i_step)
         position[1] = y_origin + delta[1] * (<double>i_step)
 
@@ -113,8 +116,8 @@ cdef inline void cast_ray_filling(
         # Density vision reduction
         # TODO no self density intersection
         density_value = density[coords.i, coords.j]
-        # vision_reduction = 0.37 / ((<double>density_value) + 0.37) 
-        # vision_strength *= vision_reduction
+        vision_reduction = 0.37 / ((<double>(max(density_value - 1, 0.0))) + 0.37) 
+        vision_strength *= vision_reduction
 
         if (wall_value == 0.0) and me_citizen:
             vision_field[coords.i, coords.j] += vision_strength

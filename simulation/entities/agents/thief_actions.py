@@ -1,7 +1,7 @@
 import random
 import numpy as np
 from ...state import State
-from ...events.event import TheftEvent
+from ...events.event import TheftEvent, MotivationEvent
 
 state = State()
 
@@ -12,7 +12,9 @@ class ThiefActions():
 
     @staticmethod
     def selects_dense_area(i_agent: int):
-        walkable_density = state.grid.density[state.grid.walkable_mask].flatten()
+        walkable_density = state.grid.density[state.grid.walkable_mask].flatten().astype(float)
+        walkable_density[walkable_density == 0.0] = 0.01
+        walkable_density = 1 / walkable_density 
         walkable_inds = state.grid.grid_indicies[state.grid.walkable_mask].flatten()
 
         walkable_p = walkable_density / walkable_density.sum()
@@ -25,8 +27,7 @@ class ThiefActions():
     @staticmethod
     def navigate(i_agent: int):
         # Check if the agent has reached the point of interest
-        state.agent_colors[i_agent, :] = [255, 0, 0]  # Set color to red for "investigating"
-        state.agent_motivations[i_agent]+= state.dTick / 10000  # Increase motivation over time
+       
 
         if state.world.maps.execute_path(i_agent):
             # If the point of interest is reached, select the next point of interest
@@ -47,26 +48,35 @@ class ThiefActions():
         agent_in_vision_inds = agents_in_vision[agent_mask]
         
         # Check if there are any visible agents
+        closest_target = -1
+        closest_target_dist = float("inf")
         for target_i in agent_in_vision_inds:
 
             if not state.agent_is_citizen[target_i]:
                 continue
 
             target_pos = state.agent_coords[target_i]
-            from_target_to_thief = state.agent_position[i_agent] - target_pos
+            from_thief_to_target = target_pos - state.agent_position[i_agent]
 
             #normalize distance
-            from_target_to_thief = from_target_to_thief / np.linalg.norm(from_target_to_thief)
-            approach_cos_angle = np.dot(from_target_to_thief,state.agent_heading_vec[target_i])
-            p_caught_by_target = approach_cos_angle /2 + 0.5 # ?
+            distance = np.linalg.norm(from_thief_to_target)
+            from_thief_to_target = from_thief_to_target / distance
+            approach_cos_angle = np.dot(from_thief_to_target, state.agent_heading_vec[target_i])
+            p_not_caught_by_target = approach_cos_angle / 2 + 0.5
+            p_not_caught_by_target = max(p_not_caught_by_target, 0.01)
+            motivation = state.agent_motivations[i_agent, 0]
 
-            factor1 = state.agent_motivations[i_agent]
+            threshold = p_not_caught_by_target * motivation * 0.8
 
-
-            if (factor1 + p_caught_by_target) > 1:
-                return ThiefActions.approach_target(i_agent, target_i)  # Start approaching the selected target
-            
-        return ThiefActions.navigate  
+            if (random.random() < threshold) and (closest_target_dist > distance):
+                print(i_agent, "not", f"{p_not_caught_by_target:.2f}", f"{motivation:.2f}")
+                closest_target_dist = distance
+                closest_target = target_i
+                        
+        if closest_target == -1:
+            return ThiefActions.navigate
+        
+        return ThiefActions.approach_target(i_agent, closest_target)  # Start approaching the selected target
 
     @staticmethod
     def approach_target(i_agent: int, target_i: int):
@@ -74,8 +84,14 @@ class ThiefActions():
         Approach the target. If close enough, attempt theft.
         """
         state.agent_speed[i_agent, :] = 0.18  # Increase speed while approaching
-        #never goes in :(
+        approach_start = state.t
+
         def action(i_agent: int):
+
+            # print(state.t - approach_start)
+            if (state.t - approach_start) > 4_000:
+                return ThiefActions.navigate
+        
             # Calculate distance to the target
             delta = state.agent_position[target_i, :] - state.agent_position[i_agent, :]
             # If within range, attempt theft
@@ -110,6 +126,7 @@ class ThiefActions():
         p_caught = max(p_caught_by_target, p_caught_by_others)
         
         caught = random.random() < p_caught
+        print(i_agent, "fail" if caught else "succ", f"{p_caught_by_target:.2f}")
 
         TheftEvent(caught, i_agent, target_i, vision_value, approach_cos_angle)
         if caught:

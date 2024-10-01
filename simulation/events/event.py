@@ -38,18 +38,32 @@ class Event:
 
 class TheftEvent(Event):
 
-    def __init__(self, caught: bool, thieve_i: int, target_i: int, vision: float, cos_angle: float) -> None:
+    def __init__(self, caught: bool, thief_i: int, target_i: int, vision: float, cos_angle: float) -> None:
         super().__init__()
 
         self.caught = caught
-        self.thieve_i = thieve_i
+        self.thief_i = thief_i
         self.target_i = target_i
         self.vision = vision
         self.cos_angle = cos_angle
 
     @classmethod
     def construct_dataframe(cls, events) -> pd.DataFrame:
-        return super().construct_dataframe(events, "caught", "thieve_i", "target_i", "vision", "cos_angle")
+        return super().construct_dataframe(events, "caught", "thief_i", "target_i", "vision", "cos_angle")
+
+class MotivationEvent(Event):
+
+    def __init__(self, current: float, delta: float, thief_i: float, reason: str) -> None:
+        super().__init__()
+
+        self.current = current
+        self.delta = delta
+        self.thief_i = thief_i
+        self.reason = reason
+
+    @classmethod
+    def construct_dataframe(cls, events) -> pd.DataFrame:
+        return super().construct_dataframe(events, "current", "delta", "thief_i", "reason")
 
 class MovementEvent(Event):
 
@@ -91,7 +105,7 @@ class EventManager:
         self.monitoring = True
         rand_id = random.randint(10_000, 100_000)
         now = datetime.datetime.now()
-        self.folder = Utils.experiments_path() / f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_{state.vars.experiment_name}_{rand_id}"
+        self.folder = Utils.experiments_path() / state.vars.experiment_name / f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_{rand_id}"
         self.folder.mkdir(parents=True)
 
         return self
