@@ -1,3 +1,4 @@
+import os
 from typing import Self, Type
 
 import numpy as np
@@ -11,12 +12,11 @@ from dataclasses import asdict
 from ..state import State
 from ..utils import Utils
 
-state = State()
-
 class Event:
 
     def __init__(
-        self
+        self,
+        state: State
     ) -> None:
         
         self.t = state.t
@@ -38,8 +38,8 @@ class Event:
 
 class TheftEvent(Event):
 
-    def __init__(self, caught: bool, thief_i: int, target_i: int, vision: float, cos_angle: float) -> None:
-        super().__init__()
+    def __init__(self, state: State, caught: bool, thief_i: int, target_i: int, vision: float, cos_angle: float) -> None:
+        super().__init__(state)
 
         self.caught = caught
         self.thief_i = thief_i
@@ -53,8 +53,8 @@ class TheftEvent(Event):
 
 class MotivationEvent(Event):
 
-    def __init__(self, current: float, delta: float, thief_i: float, reason: str) -> None:
-        super().__init__()
+    def __init__(self, state: State, current: float, delta: float, thief_i: float, reason: str) -> None:
+        super().__init__(state)
 
         self.current = current
         self.delta = delta
@@ -68,8 +68,8 @@ class MotivationEvent(Event):
 
 class VisionEvent(Event):
 
-    def __init__(self, vision: np.ndarray) -> None:
-        super().__init__()
+    def __init__(self, state: State, vision: np.ndarray) -> None:
+        super().__init__(state)
 
         self.vision = vision
 
@@ -87,8 +87,8 @@ class VisionEvent(Event):
 
 class MovementEvent(Event):
 
-    def __init__(self, agent_position: np.ndarray) -> None:
-        super().__init__()
+    def __init__(self, state: State, agent_position: np.ndarray) -> None:
+        super().__init__(state)
 
         self.agent_position = agent_position
 
@@ -106,10 +106,11 @@ class MovementEvent(Event):
 
 class EventManager:
 
-    def __init__(self) -> None:
+    def __init__(self, state: State) -> None:
         self.monitoring = False
         self.events: dict[Type[Event], list[Event]] = dict()
         self.folder: Path | None = None
+        self.state = state
 
     def add_event(self, event: Event):
 
@@ -123,9 +124,9 @@ class EventManager:
     def __enter__(self) -> Self:
 
         self.monitoring = True
-        rand_id = random.randint(10_000, 100_000)
+        rand_id = random.randint(10_000, 100_000 - 1)
         now = datetime.datetime.now()
-        self.folder = Utils.experiments_path() / state.vars.experiment_name / f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_{rand_id}"
+        self.folder = Utils.experiments_path() / self.state.vars.experiment_name / f"{now.strftime('%Y-%m-%d_%H-%M-%S')}_{rand_id}"
         self.folder.mkdir(parents=True)
 
         return self
@@ -139,5 +140,5 @@ class EventManager:
             df.to_parquet(self.folder / f"{EventClass.__name__}.parquet", index=False)
 
         with open(self.folder / "config.json", "w", encoding="utf-8") as f:
-            json.dump(asdict(state.vars), f)
+            json.dump(asdict(self.state.vars), f)
         

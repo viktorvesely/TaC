@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import numpy as np
 from pygame import Rect, Surface
@@ -7,7 +8,6 @@ from .grid import Grid
 from ..events.event import VisionEvent
 from .c_vision.vision import generate_vision_field
 
-state = State()
 
 class Vision:
 
@@ -16,9 +16,10 @@ class Vision:
     vision_length = 160.0   # Max distance
     n_rays = 5
 
-    def __init__(self, grid: Grid) -> None:
+    def __init__(self, state: State, grid: Grid) -> None:
         
         self.grid = grid
+        self.state = state
         self.values = np.zeros_like(self.grid.walls)
         self.max_targets_per_agent: int = 5
         state.agents_in_vision = np.full((state.n_agents, self.max_targets_per_agent), -1, dtype=np.int32)
@@ -28,9 +29,9 @@ class Vision:
 
     def draw_vision_map(self, surface: Surface):
         
-        camera = state.camera
+        camera = self.state.camera
         top_left = camera.screenToWorld @ np.zeros(2)
-        bottom_right = camera.screenToWorld @ state.window.window_size
+        bottom_right = camera.screenToWorld @ self.state.window.window_size
 
         # Get indices of walls in FOV
         left, right, top, bottom = self.grid.get_walls_inds_from_to(top_left, bottom_right)
@@ -64,16 +65,16 @@ class Vision:
     def tick(self):
 
 
-        state.agents_in_vision = np.full((state.n_agents, self.max_targets_per_agent), -1, dtype=np.int32)
+        self.state.agents_in_vision = np.full((self.state.n_agents, self.max_targets_per_agent), -1, dtype=np.int32)
         self.values = generate_vision_field(
-            state.agent_position,
-            state.agent_angle,
-            state.agent_is_citizen.astype(np.int32),
+            self.state.agent_position,
+            self.state.agent_angle,
+            self.state.agent_is_citizen.astype(np.int32),
             self.grid.walls,
             self.grid.density,
             self.grid.offsets,
             self.grid.homogenous_indicies,
-            state.agents_in_vision,
+            self.state.agents_in_vision,
             self.grid.world_TL,
             self.grid.size,
             self.vision_length,
@@ -81,9 +82,9 @@ class Vision:
             self.n_rays
         )
 
-        if state.t >= self.next_vision_event:
-            VisionEvent(self.values)
-            self.next_vision_event = state.t + 1_000
+        if self.state.t >= self.next_vision_event:
+            VisionEvent(self.state, self.values)
+            self.next_vision_event = self.state.t + 1_000
 
 
 

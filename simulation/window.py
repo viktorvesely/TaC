@@ -5,15 +5,15 @@ import pygame_gui
 
 from .state import State
 
-state = State()
-
 class Window:
 
     # Define window size using numpy array [width, height]
     window_size: np.ndarray = np.array([1200, 600])
 
-    def __init__(self):
+    def __init__(self, state: State):
 
+
+        self.state = state
         self.running: bool = False
         self.surface: pygame.Surface | None = None
         self.manager: pygame_gui.UIManager | None = None
@@ -63,7 +63,7 @@ class Window:
     
     def pygame_event_handler(self):
 
-        state.keys_pressed.clear()
+        self.state.keys_pressed.clear()
 
         # Close window input
         for event in pygame.event.get():
@@ -71,7 +71,7 @@ class Window:
                 self.running = False
 
             if event.type == pygame.KEYDOWN:
-                state.keys_pressed.add(event.key)
+                self.state.keys_pressed.add(event.key)
 
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 
@@ -86,7 +86,7 @@ class Window:
             
             self.manager.process_events(event)
 
-        self.manager.update(state.dTick / 2000)
+        self.manager.update(self.state.dTick / 2000)
 
 
 

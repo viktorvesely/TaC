@@ -10,7 +10,6 @@ from ..state import State
 
 
 pi = np.pi
-state = State()
 
 type HeuristicFunc = Callable[[tuple[int, int], tuple[int, int]], float]
 
@@ -26,9 +25,10 @@ class GoogleMaps:
     # Directions for moving in the grid (up, down, left, right)
     neighbors = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, -1), (-1, 1), (1, 1), (-1, -1)]
 
-    def __init__(self, grid: Grid, pois: PointsOfInterests) -> None:
+    def __init__(self, state: State, grid: Grid, pois: PointsOfInterests) -> None:
         self.grid = grid
         self.pois = pois
+        self.state = state
         self.paths: list[list[tuple[int, int]] | None] = [None for _ in range(state.agent_position.shape[0])]
 
 
@@ -41,7 +41,7 @@ class GoogleMaps:
 
     def execute_path(self, i_agent: int) -> bool:
 
-        agent_coords = state.agent_coords[i_agent, :].tolist()
+        agent_coords = self.state.agent_coords[i_agent, :].tolist()
 
         path = self.paths[i_agent]
         if path is None:
@@ -66,14 +66,14 @@ class GoogleMaps:
         )
 
         # delta = cell_pos - agent_pos
-        agent_pos = state.agent_position[i_agent, :].tolist()
+        agent_pos = self.state.agent_position[i_agent, :].tolist()
         angle = math.atan2(cell_pos[1] - agent_pos[1], cell_pos[0] - agent_pos[0])
-        state.agent_angle[i_agent] = angle
+        self.state.agent_angle[i_agent] = angle
 
         return False
         
     def navigate_agent(self, i_agent: int, to: tuple[int, int], heuristic: HeuristicFunc | None = None):
-        agent_coords = state.agent_coords[i_agent]
+        agent_coords = self.state.agent_coords[i_agent]
         new_path = self.navigate(tuple(agent_coords), to, heuristic)
         self.paths[i_agent] = new_path
 

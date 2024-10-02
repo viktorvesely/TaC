@@ -4,12 +4,10 @@ import random
 from .agent_actions import ActionFunc
 from ...state import State
 
-state = State()
-
 introvert_roaming = 0
 extrovert_roaming = 1
 roaming_types = (introvert_roaming, extrovert_roaming)
-roaming_weights = np.array([4, 1])
+roaming_weights = np.array([6, 1])
 roaming_weights = roaming_weights / roaming_weights.sum()
 
 class CitizenActions:
@@ -18,7 +16,7 @@ class CitizenActions:
     weigths = weigths / weigths.sum()
     
     @staticmethod
-    def select_action(i_agent: int):
+    def select_action(i_agent: int, state: State):
         return np.random.choice(
             [CitizenActions.start_roaming, CitizenActions.select_poi, CitizenActions.social_interaction],
             p=CitizenActions.weigths  # 50% of roaming randomly, 40% move at POI, 10% engage in social interaction
@@ -26,29 +24,28 @@ class CitizenActions:
 
     
     @staticmethod
-    def select_poi(i_agent: int):
+    def select_poi(i_agent: int, state: State):
         to = state.world.pois.select_random()
         state.maps.navigate_agent(i_agent, to, heuristic=state.maps.heuristic_avoid_dense)
         return CitizenActions.navigate
     
     @staticmethod
-    def navigate(i_agent: int):
+    def navigate(i_agent: int, state: State):
 
-        def action(i_agent: int):
-            if state.maps.execute_path(i_agent):
-                return CitizenActions.wait_and_look(
-                    i_agent,
-                    random.randint(5_000, 15_000),
-                    np.pi / 6, CitizenActions.select_action
-                )
-            
-            return action
+        if state.maps.execute_path(i_agent):
+            return CitizenActions.wait_and_look(
+                i_agent,
+                state,
+                random.randint(5_000, 15_000),
+                np.pi / 6, CitizenActions.select_action
+            )
+        
     
-        return action
+        return CitizenActions.navigate
     
 
     @staticmethod
-    def start_roaming(i_agent: int):
+    def start_roaming(i_agent: int, state: State):
 
         roaming_type = np.random.choice(roaming_types, p=roaming_weights)
 
@@ -74,14 +71,14 @@ class CitizenActions:
         return CitizenActions.roaming
     
     @staticmethod
-    def roaming(i_agent: int):
+    def roaming(i_agent: int, state: State):
         if state.maps.execute_path(i_agent):
-            return CitizenActions.wait_and_look(i_agent, 5_000, np.pi / 5, CitizenActions.select_action)
+            return CitizenActions.wait_and_look(i_agent, state, 5_000, np.pi / 5, CitizenActions.select_action)
         return CitizenActions.roaming
 
   
     @staticmethod
-    def wait_and_look(i_agent: int, time_ms: float, look_deviation: float, after_action: ActionFunc):
+    def wait_and_look(i_agent: int, state: State, time_ms: float, look_deviation: float, after_action: ActionFunc):
 
         t_finish = state.t + time_ms
         original_angle = state.agent_angle[i_agent]
@@ -90,7 +87,7 @@ class CitizenActions:
         original_speed = state.agent_speed[i_agent, 0]
         state.agent_speed[i_agent] = 0
 
-        def action(i_agent: int):
+        def action(i_agent: int, state: State):
             nonlocal next_devation
             
             if state.t >= t_finish:
@@ -107,13 +104,13 @@ class CitizenActions:
 
 
     @staticmethod
-    def social_interaction(i_agent: int):
+    def social_interaction(i_agent: int, state: State):
 
         agents_inds = state.grid.get_agents_around_cell(state.agent_coords[i_agent, :])
         engagement_probability = 0.3
 
         if agents_inds.size < 2:
-            return CitizenActions.wait_and_look(i_agent, 3_000, random.random() * (np.pi / 4), CitizenActions.select_action)
+            return CitizenActions.wait_and_look(i_agent, state, 3_000, random.random() * (np.pi / 4), CitizenActions.select_action)
 
 
         citizens_mask = state.agent_is_citizen[agents_inds.tolist()]
@@ -127,7 +124,7 @@ class CitizenActions:
         interact_inds = agents_inds[interaction_mask & citizens_mask]
 
         if interact_inds.size < 2:
-            return CitizenActions.wait_and_look(i_agent, 3_000, random.random() * (np.pi / 4), CitizenActions.select_action)
+            return CitizenActions.wait_and_look(i_agent, state, 3_000, random.random() * (np.pi / 4), CitizenActions.select_action)
 
 
         positions = state.agent_position[interact_inds.tolist(), :]
@@ -138,6 +135,6 @@ class CitizenActions:
         for other_i, angle in zip(interact_inds, angles, strict=True):
 
             state.agent_angle[other_i] = angle
-            state.world.agents.actions[other_i] = CitizenActions.wait_and_look(other_i, 10_000, 0, CitizenActions.select_action)
+            state.world.agents.actions[other_i] = CitizenActions.wait_and_look(other_i, state, 10_000, 0, CitizenActions.select_action)
 
         return state.world.agents.actions[i_agent]

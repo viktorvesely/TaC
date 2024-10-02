@@ -7,15 +7,15 @@ from ..entities.agents.agent import Agent
 from ..state import State
 from .c_collision.collision import resolve_collision
 
-state = State() # Singleton for accessing state of game or simulation
 
 WPOS_TL = 0     # Top left placement
 WPOS_MIDDLE = 1 # Middle placement
 
 class Grid:     # 2D grid world, handles spatial positioning, wall locations, and drawing of grid and walls
 
-    def __init__(self, walls: np.ndarray, size: float = 40) -> None:
+    def __init__(self, state: State, walls: np.ndarray, size: float = 40) -> None:
 
+        self.state = state
         self.walls = walls
         self.walkable_mask = np.isclose(walls, 0.0)
         n_grids = walls.shape[0]
@@ -43,7 +43,7 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
         self.register_agent_coords()
         spawn_mask = np.isclose(self.walls, 0.0)
         grid_indicies = self.grid_indicies[spawn_mask].flatten()
-        agent_coords = np.random.choice(grid_indicies, size=state.agent_position.shape[0])
+        agent_coords = np.random.choice(grid_indicies, size=self.state.agent_position.shape[0])
         agent_coords = np.array(agent_coords.tolist(), dtype=np.int32)
         return agent_coords, self.vectorized_cell_to_world(agent_coords, WPOS_MIDDLE)
 
@@ -100,13 +100,13 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
         return out
 
     def draw_grid(self, surface: Surface): # Draw grid lines on surface using camera's view
-        camera = state.camera
+        camera = self.state.camera
         w_min, w_max = self.world_size
 
         # Get visible area in world coordinates
         top_left = camera.screenToWorld @ np.zeros(2)
         top_left = np.clip(top_left, w_min, w_max)
-        bottom_right = camera.screenToWorld @ state.window.window_size
+        bottom_right = camera.screenToWorld @ self.state.window.window_size
         bottom_right = np.clip(bottom_right, w_min, w_max)
 
         # Calculate the range of the visible area in world coordinates
@@ -153,9 +153,9 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
     def draw_walls(self, surface: Surface):
         
         # Draw walls on surface based on camera view
-        camera = state.camera
+        camera = self.state.camera
         top_left = camera.screenToWorld @ np.zeros(2)
-        bottom_right = camera.screenToWorld @ state.window.window_size
+        bottom_right = camera.screenToWorld @ self.state.window.window_size
 
         left, right, top, bottom = self.get_walls_inds_from_to(top_left, bottom_right)
         w, i = self.walls[top:bottom, left:right], self.grid_indicies[top:bottom, left:right]
@@ -188,7 +188,7 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
     def handle_wall_collision(self):
 
 
-        ent_pos = state.agent_position
+        ent_pos = self.state.agent_position
         n_ents = ent_pos.shape[0]
 
         # Extract cell info given particle
@@ -225,13 +225,13 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
 
         # Resolve the collision using the collision point
         ent_pos[collide_mask] = collision_closest_points
-        state.agent_position = ent_pos
+        self.state.agent_position = ent_pos
 
         
 
     def register_agent_coords(self):
 
-        agent_coords = state.agent_coords if state.agent_coords is not None else self.vectorized_world_to_cell(state.agent_position)
+        agent_coords = self.state.agent_coords if self.state.agent_coords is not None else self.vectorized_world_to_cell(self.state.agent_position)
         i, j = agent_coords.T
         self.density = np.zeros((self.ngrids, self.ngrids), dtype=np.int32)
         np.add.at(self.density, (i, j), 1.0)
@@ -246,8 +246,8 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
     def tick(self):
 
         resolve_collision(
-            state.agent_position,
-            state.agent_velocity,
+            self.state.agent_position,
+            self.state.agent_velocity,
             self.world_TL,
             self.density,
             self.offsets,
@@ -255,12 +255,12 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
             self.size,
             self.walls.shape[0],
             self.walls.shape[1],
-            state.vars.agent_size
+            self.state.vars.agent_size
         )
 
-        state.agent_position = np.clip(state.agent_position, *(self.world_size + np.array([10, -10])))
+        self.state.agent_position = np.clip(self.state.agent_position, *(self.world_size + np.array([10, -10])))
         self.handle_wall_collision()
-        state.agent_position = np.clip(state.agent_position, *(self.world_size + np.array([10, -10])))
+        self.state.agent_position = np.clip(self.state.agent_position, *(self.world_size + np.array([10, -10])))
 
         self.register_agent_coords()
         
@@ -275,4 +275,4 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
 
         self.draw_walls(surface)
 
-        # print(self.world_pos_to_cell_pos(state.camera.screenToWorld @ np.array(pygame.mouse.get_pos())))
+        # print(self.world_pos_to_cell_pos(self.state.camera.screenToWorld @ np.array(pygame.mouse.get_pos())))

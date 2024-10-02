@@ -19,26 +19,24 @@ main = __name__ == "__main__"
 def now():
     return toMs(perf_counter_ns())
 
-
-state = State()
-
 def realtime_simulation():
 
     paused = False
+    state = State(bypass=True)
 
-    window = Window()
+    window = Window(state)
     state.window = window
 
     camera = Camera(window.window_size, np.zeros(2))
     state.camera = camera
 
-    world = World(window)
+    world = World(state, window)
     state.world = world
 
     state.last_tick = now()
     state.start_t = now()
 
-    event_manager = EventManager()
+    event_manager = EventManager(state)
     state.event_manager = event_manager
 
     with window, event_manager:
@@ -51,15 +49,15 @@ def realtime_simulation():
                 paused = not paused
 
             if paused:
-                paused_simulation_cycle(window, camera, world)
+                paused_simulation_cycle(window, camera, world, state)
             else:
-                realtime_simulation_cycle(window, camera, world)
+                realtime_simulation_cycle(window, camera, world, state)
 
             sleep((0.002))
 
     print(state.t - state.start_t)
 
-def paused_simulation_cycle(window: Window, camera: Camera, world: World):
+def paused_simulation_cycle(window: Window, camera: Camera, world: World, state: State):
 
     d = state.dTick_target
     state.t = now()  
@@ -75,7 +73,7 @@ def paused_simulation_cycle(window: Window, camera: Camera, world: World):
     state.last_tick = state.t
         
 
-def realtime_simulation_cycle(window: Window, camera: Camera, world: World):
+def realtime_simulation_cycle(window: Window, camera: Camera, world: World, state: State):
     
     camera.tick()
 
@@ -93,17 +91,18 @@ def realtime_simulation_cycle(window: Window, camera: Camera, world: World):
 
 def experiment_simulation(config: Vars, desired_t_s: float):
 
+    state = State(bypass=True)
     state.vars = config
 
     np.random.seed(int.from_bytes(os.urandom(4), byteorder='little'))
     random.seed(int.from_bytes(os.urandom(4), byteorder='little'))
 
-    event_manager = EventManager()
+    event_manager = EventManager(state)
     state.event_manager = event_manager
 
-    state.window = Window()
+    state.window = Window(state)
 
-    world = World(state.window)
+    world = World(state, state.window)
     state.world = world
 
     state.start_t = 0
@@ -124,6 +123,7 @@ def experiment_simulation(config: Vars, desired_t_s: float):
 if main:
 
     if True:
+        #experiment_simulation(Vars(generation_empty_w=6.4324343), 40)
         realtime_simulation()
     else:
         import pstats, cProfile

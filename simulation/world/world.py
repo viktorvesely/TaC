@@ -13,19 +13,18 @@ from .poi import PointsOfInterests
 from .navigation import GoogleMaps
 from .generation import WorldGenerator
 
-state = State() 
 
 class World(WorldInterface):             # Concrete implementation of WorldInterface
-    def __init__(self, window: Window):
+    def __init__(self, state: State, window: Window):
         
-        self.generator = WorldGenerator(state.vars.n_grids)
+        self.generator = WorldGenerator(state, state.vars.n_grids)
         self.window = window
-        self.agents = Agent(state.vars.n_thieves, state.vars.n_citizens)
-        self.grid: Grid = Grid(self.generator.generate_walls())
-        self.vision: Vision = Vision(self.grid)
-        self.pois: PointsOfInterests = PointsOfInterests(self.grid)
+        self.agents = Agent(state, state.vars.n_thieves, state.vars.n_citizens)
+        self.grid: Grid = Grid(state, self.generator.generate_walls())
+        self.vision: Vision = Vision(state, self.grid)
+        self.pois: PointsOfInterests = PointsOfInterests(state, self.grid)
         self.pois.register_existing()
-        self.maps = GoogleMaps(self.grid, self.pois)
+        self.maps = GoogleMaps(state, self.grid, self.pois)
 
         state.maps = self.maps
         state.grid = self.grid

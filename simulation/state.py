@@ -21,27 +21,21 @@ class Vars:
     generation_corners_w: float = 10
     generation_cross_w: float = 10
     generation_empty_w: float = 10
-    generation_one_w: float = 20
+    generation_one_w: float = 12
     
     n_thieves: int = 12
     n_citizens: int = 120
     agent_size: float = 10
 
-    n_grids: int = 24
+    n_grids: int = 30
     
-    
+class State:
 
-class Singleton(type):
-    _instances = {}
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
-
-class State(metaclass=Singleton):
-
-    def __init__(self) -> None:
+    def __init__(self, bypass=False) -> None:
         
+        if not bypass:
+            raise RuntimeError("State can only be created from main")
+
         self.world: World = None
         self.maps: GoogleMaps = None
         self.grid: Grid = None

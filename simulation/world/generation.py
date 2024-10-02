@@ -2,8 +2,6 @@ import numpy as np
 
 from ..state import State
 
-state = State()
-
 DOWN = 0
 RIGHT = 1
 UP = 2
@@ -133,23 +131,11 @@ types_to_array = [
     ]),
 ]
 
-w_objects = np.array([
-    state.vars.generation_lines_w, # vline
-    state.vars.generation_lines_w, # hline
-    state.vars.generation_corners_w, # corners
-    state.vars.generation_corners_w,
-    state.vars.generation_corners_w,
-    state.vars.generation_corners_w,
-    state.vars.generation_empty_w, # empty
-    state.vars.generation_cross_w, # cross
-    state.vars.generation_one_w # one
-])
-
 class WorldGenerator:
 
     n_grids_per_side: int = 3
 
-    def __init__(self, n_grids: int):
+    def __init__(self, state: State, n_grids: int):
 
         if (n_grids % self.n_grids_per_side) != 0:
             raise ValueError(f"n_grids needs to be divisible by {self.n_grids_per_side}")
@@ -157,6 +143,18 @@ class WorldGenerator:
         self.n_grids = n_grids
         self.N = int(n_grids / self.n_grids_per_side)
         self.wave = np.full((self.N, self.N, len(rules)), True, dtype=bool)
+
+        self.w_objects = np.array([
+            state.vars.generation_lines_w, # vline
+            state.vars.generation_lines_w, # hline
+            state.vars.generation_corners_w, # corners
+            state.vars.generation_corners_w,
+            state.vars.generation_corners_w,
+            state.vars.generation_corners_w,
+            state.vars.generation_empty_w, # empty
+            state.vars.generation_cross_w, # cross
+            state.vars.generation_one_w # one
+        ])
 
     def update_neighbours(self, io: int, jo: int, world: np.ndarray):
 
@@ -317,7 +315,7 @@ class WorldGenerator:
 
             # Choose the tile type
             possible_colapse = np.where(wave[c_i, c_j])[0]
-            weights = w_objects[wave[c_i, c_j]]
+            weights = self.w_objects[wave[c_i, c_j]]
             p = weights / weights.sum()
             collapse_choice = np.random.choice(possible_colapse, p=p)
             world[c_i, c_j] = collapse_choice

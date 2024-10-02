@@ -1,8 +1,5 @@
 import numpy as np
 import pygame
-from .state import State
-
-state = State()
 
 class CameraMatrix:
     __slots__ = ('m',)
