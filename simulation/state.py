@@ -20,14 +20,14 @@ class Vars:
     generation_lines_w: float = 30
     generation_corners_w: float = 10
     generation_cross_w: float = 10
-    generation_empty_w: float = 10
+    generation_empty_w: float = 1
     generation_one_w: float = 12
     
-    n_thieves: int = 12
-    n_citizens: int = 120
+    n_thieves: int = 8
+    n_citizens: int = 80
     agent_size: float = 10
 
-    n_grids: int = 30
+    n_grids: int = 24
     
 class State:
 
@@ -68,3 +68,4 @@ class State:
         self.agent_is_citizen: np.ndarray = None
         self.agent_motivations: np.ndarray = None
         self.agent_heading_vec: np.ndarray = None
+        self.agent_last_rob: np.ndarray = None

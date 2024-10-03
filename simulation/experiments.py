@@ -23,12 +23,12 @@ if __name__ == "__main__":
     import numpy as np
 
 
-    source = Vars(experiment_name="motivation_high_effect")
+    source = Vars(experiment_name="look_for_target_cooldown")
     configs = vary(
         source,
         name="generation_empty_w",
-        values=np.linspace(1, 50, num=15),
-        variations=7
+        values=np.linspace(1, 80, num=2, endpoint=True),
+        variations=60
     )
 
 

@@ -30,9 +30,6 @@ def realtime_simulation():
     camera = Camera(window.window_size, np.zeros(2))
     state.camera = camera
 
-    world = World(state, window)
-    state.world = world
-
     state.last_tick = now()
     state.start_t = now()
 
@@ -40,6 +37,9 @@ def realtime_simulation():
     state.event_manager = event_manager
 
     with window, event_manager:
+
+        world = World(state, window)
+        state.world = world
 
         while window.running:
 
@@ -102,15 +102,16 @@ def experiment_simulation(config: Vars, desired_t_s: float):
 
     state.window = Window(state)
 
-    world = World(state, state.window)
-    state.world = world
-
     state.start_t = 0
     state.t = state.start_t
     state.last_tick = state.start_t
     end_t = (desired_t_s * 1000) + state.start_t
 
     with event_manager:
+        
+        world = World(state, state.window)
+        state.world = world
+
         while state.t < end_t:
             d = state.dTick_target
             state.t += d

@@ -7,7 +7,7 @@ from ...state import State
 introvert_roaming = 0
 extrovert_roaming = 1
 roaming_types = (introvert_roaming, extrovert_roaming)
-roaming_weights = np.array([6, 1])
+roaming_weights = np.array([10, 1])
 roaming_weights = roaming_weights / roaming_weights.sum()
 
 class CitizenActions:
@@ -50,16 +50,15 @@ class CitizenActions:
         roaming_type = np.random.choice(roaming_types, p=roaming_weights)
 
         if roaming_type == introvert_roaming:
-            walkable_density = state.grid.density[state.grid.walkable_mask].flatten().astype(float)
-            walkable_density[walkable_density == 0.0] = 0.01
-            walkable_density = 1 / walkable_density 
+            walkable_density = state.grid.blurry_density[state.grid.walkable_mask].flatten().astype(float)
+            walkable_density = 1 / (walkable_density + 1) 
             walkable_inds = state.grid.grid_indicies[state.grid.walkable_mask].flatten()
 
             walkable_p = walkable_density / walkable_density.sum()
             go_to = np.random.choice(walkable_inds, p=walkable_p)
         
         elif roaming_type == extrovert_roaming:
-            walkable_density = state.grid.density[state.grid.walkable_mask].flatten().astype(float)
+            walkable_density = state.grid.blurry_density[state.grid.walkable_mask].flatten().astype(float)
             walkable_inds = state.grid.grid_indicies[state.grid.walkable_mask].flatten()
 
             walkable_p = walkable_density / walkable_density.sum()
@@ -135,6 +134,6 @@ class CitizenActions:
         for other_i, angle in zip(interact_inds, angles, strict=True):
 
             state.agent_angle[other_i] = angle
-            state.world.agents.actions[other_i] = CitizenActions.wait_and_look(other_i, state, 10_000, 0, CitizenActions.select_action)
+            state.world.agents.actions[other_i] = CitizenActions.wait_and_look(other_i, state, 5_000, 0, CitizenActions.select_action)
 
         return state.world.agents.actions[i_agent]

@@ -1,4 +1,5 @@
 from typing import Callable
+from matplotlib import pyplot as plt
 from pygame import Surface
 import pygame
 import numpy as np
@@ -39,7 +40,9 @@ class Agent(AgentInterface):
         self.state.agent_is_citizen = np.full(n, True)
         self.state.agent_is_citizen[n_citizens:] = False
         self.state.agent_heading_vec = np.vstack((np.cos(self.state.agent_angle), np.sin(self.state.agent_angle))).T
+        self.state.agent_last_rob = np.full(n, self.state.t)
         self.actions: list[ActionFunc] = []
+
 
         for i in range(n):
             if self.state.agent_is_citizen[i]:
@@ -55,7 +58,7 @@ class Agent(AgentInterface):
                 self.state.agent_colors[i, 2] = 0
                 # setting the thief motivation to 0.5
                 self.state.agent_motivations[i,0] = 0
-                self.actions.append(ThiefActions.selects_dense_area)
+                self.actions.append(ThiefActions.select_almost_empty_area)
         #self.close_range = 0.1
 
     def look_random(self, i_agent: int, multiplier: float):
@@ -68,11 +71,29 @@ class Agent(AgentInterface):
         
         super().tick()
 
-        factor = 0.0006
-        bias = 4.5 # Above 2 means more toward gaining motivation bellow to towards loosing NOT LINEAR!!!
-        thiefs_coords = self.state.agent_coords[~self.state.agent_is_citizen, :]
+        thief_mask = ~self.state.agent_is_citizen
+        factor = 0.0001
+        bias = 2 # Above 2 means more toward gaining motivation bellow to towards loosing NOT LINEAR!!!
+
+        max_md = factor - (factor / bias)
+        min_md = -(factor / bias)
+        need_boost = 1.5
+        max_need = abs(min_md) * need_boost
+        time_max_boost = 5_000
+
+        k = 0.11
+        l = 1.1
+
+        thiefs_coords = self.state.agent_coords[thief_mask, :]
         thiefs_vision_values = self.state.world.vision.values[tuple(thiefs_coords.T)]
-        self.state.agent_motivations[~self.state.agent_is_citizen, :] += ((factor *(1 - thiefs_vision_values) - (factor / bias)) * self.state.dTick)[:, np.newaxis]
+        
+        delta_last_rob = self.state.t - self.state.agent_last_rob[thief_mask]     
+        t = np.clip(delta_last_rob, 0, time_max_boost) / time_max_boost
+        from_vision = (factor *(1 - thiefs_vision_values) - (factor / bias))
+        from_last_rob = ((-k) / (t -l) - (k/l)) * max_need
+        delta_motivation = (from_vision + from_last_rob) * self.state.dTick
+        
+        self.state.agent_motivations[~self.state.agent_is_citizen, :] += delta_motivation[:, np.newaxis]
         self.state.agent_motivations = np.clip(self.state.agent_motivations, 0.0, 1.0) 
 
         for i, action in enumerate(self.actions):
@@ -96,7 +117,10 @@ class Agent(AgentInterface):
 
         t_colors = self.state.agent_motivations[~self.state.agent_is_citizen]
         t_colors = np.squeeze(t_colors)
-        t_colors = mpl.colormaps["viridis"](t_colors) * 255
+        t_colors = np.pad(t_colors, 1)
+        t_colors[-1] = 1
+        t_colors = mpl.colormaps["plasma"](t_colors) * 255
+        t_colors = t_colors[1:-1, :]
         t_colors = t_colors[:, :3].astype(np.int32)
         self.state.agent_colors[~self.state.agent_is_citizen, :] = t_colors
 

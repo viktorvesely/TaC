@@ -1,12 +1,20 @@
 import numpy as np
 from pygame import Surface, draw, Rect
 import pygame
+from scipy.signal import convolve2d
+
 
 from ..entities.entity import Entity
 from ..entities.agents.agent import Agent
 from ..state import State
 from .c_collision.collision import resolve_collision
 
+
+def gaussian_kernel(size: int, sigma: float) -> np.ndarray:
+    ax = np.linspace(-(size // 2), size // 2, size)
+    x, y = np.meshgrid(ax, ax)
+    kernel = np.exp(-(x**2 + y**2) / (2 * sigma**2))
+    return kernel / np.sum(kernel)
 
 WPOS_TL = 0     # Top left placement
 WPOS_MIDDLE = 1 # Middle placement
@@ -35,6 +43,8 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
                 self.grid_indicies[i, j] = (i, j)
 
         self.density: np.ndarray = np.zeros_like(self.walls, dtype=np.int32)
+        self.blurry_density: np.ndarray = np.zeros_like(self.walls)
+        self.gaussian_filter: np.ndarray = gaussian_kernel(7, 0.7)
         self.offsets: np.ndarray = np.zeros_like(self.walls, dtype=np.int32)
         self.homogenous_indicies: np.ndarray | None = None 
         
@@ -235,6 +245,8 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
         i, j = agent_coords.T
         self.density = np.zeros((self.ngrids, self.ngrids), dtype=np.int32)
         np.add.at(self.density, (i, j), 1.0)
+
+        self.blurry_density =  convolve2d(self.density.astype(float), self.gaussian_filter, mode="same", boundary="symm")
 
         self.offsets = np.cumsum(
             np.pad(self.density.flatten(), (1, 0))

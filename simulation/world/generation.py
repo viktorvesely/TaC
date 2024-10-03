@@ -219,8 +219,18 @@ class WorldGenerator:
         return walls
 
     def generate_walls(self):
-        world = self.collapse_wave()
-        walls = self.world_to_walls(world)
+
+
+        max_tries = 10
+        for i_try in range(max_tries):
+            world = self.collapse_wave()
+            walls = self.world_to_walls(world)
+            if np.any(np.isclose(walls, 2)):
+                break
+
+        if i_try == (max_tries - 1):
+            raise RuntimeError(f"Could not generate a world with a single POI after {max_tries} tries")
+
         self.resolve_boundary(walls)
         return walls
     

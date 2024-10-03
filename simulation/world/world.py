@@ -12,6 +12,7 @@ from .vision_interface import Vision
 from .poi import PointsOfInterests
 from .navigation import GoogleMaps
 from .generation import WorldGenerator
+from ..events.event import MapEvent
 
 
 class World(WorldInterface):             # Concrete implementation of WorldInterface
@@ -20,7 +21,10 @@ class World(WorldInterface):             # Concrete implementation of WorldInter
         self.generator = WorldGenerator(state, state.vars.n_grids)
         self.window = window
         self.agents = Agent(state, state.vars.n_thieves, state.vars.n_citizens)
-        self.grid: Grid = Grid(state, self.generator.generate_walls())
+
+        walls = self.generator.generate_walls()
+        MapEvent(state, walls)
+        self.grid: Grid = Grid(state, walls)
         self.vision: Vision = Vision(state, self.grid)
         self.pois: PointsOfInterests = PointsOfInterests(state, self.grid)
         self.pois.register_existing()

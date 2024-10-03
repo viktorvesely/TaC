@@ -1,5 +1,5 @@
 import os
-from typing import Self, Type
+from typing import Literal, Self, Type
 
 import numpy as np
 import pandas as pd
@@ -35,6 +35,36 @@ class Event:
                 df[key] = col
         
         return pd.DataFrame(df)
+
+class ChosenTargetEvent(Event):
+
+    def __init__(self, state: State, thief_i: int, target_i: bool, motivation: float, distance: float, p_not_caught: float) -> None:
+        super().__init__(state)
+
+        self.p_not_caught = p_not_caught
+        self.thief_i = thief_i
+        self.target_i = target_i
+        self.distance = distance
+        self.motivation = motivation
+
+    @classmethod
+    def construct_dataframe(cls, events) -> pd.DataFrame:
+        return super().construct_dataframe(events, "p_not_caught", "thief_i", "target_i", "distance", "motivation")
+    
+class TheftAborted(Event):
+
+    def __init__(self, state: State, thief_i: int, motivation: float, distance: float, reason: Literal["time", "motivation", "turned"]) -> None:
+        super().__init__(state)
+
+        self.thief_i = thief_i
+        self.distance = distance
+        self.motivation = motivation
+        self.reason = reason
+
+
+    @classmethod
+    def construct_dataframe(cls, events) -> pd.DataFrame:
+        return super().construct_dataframe(events, "thief_i", "distance", "motivation", "reason")
 
 class TheftEvent(Event):
 
@@ -103,6 +133,23 @@ class MovementEvent(Event):
             dfs.append(df)
 
         return pd.concat(dfs, ignore_index=True)
+    
+class MapEvent(Event):
+
+    def __init__(self, state: State, walls: np.ndarray) -> None:
+        super().__init__(state)
+
+        self.walls = walls
+
+    @classmethod
+    def construct_dataframe(cls, events, *keys) -> pd.DataFrame:
+        
+        if len(events) > 1:
+            raise ValueError("Only one map event is permitted")
+    
+        
+        return pd.DataFrame(events[0].walls)
+    
 
 class EventManager:
 

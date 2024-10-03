@@ -76,7 +76,7 @@ cdef inline void cast_ray_filling(
     last_coords.i = -150
     last_coords.j = -237
     cdef int i_step
-    cdef double vision_strength = 0.1;
+    cdef double vision_strength = 0.18;
     cdef double vision_falloff = (vision_strength - 0.01) / (<double>n_steps)
     cdef double vision_reduction
     cdef double wall_value
