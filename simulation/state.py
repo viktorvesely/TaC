@@ -24,7 +24,7 @@ class Vars:
     generation_one_w: float = 12
     
     n_thieves: int = 8
-    n_citizens: int = 80
+    n_citizens: int = 70
     agent_size: float = 10
 
     n_grids: int = 24

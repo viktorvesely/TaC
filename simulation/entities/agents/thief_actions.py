@@ -25,7 +25,7 @@ class ThiefActions():
     @staticmethod
     def navigate(i_agent: int, state: State):
 
-        target_look_period = 1_000
+        target_look_period = 2_000
         next_target_look = state.t
 
         def action(i_agent: int, state: State):
@@ -105,8 +105,7 @@ class ThiefActions():
 
         def action(i_agent: int, state: State):
 
-            
-            time_reason = (state.t - approach_start) > 3_000
+            time_reason = (state.t - approach_start) > 1_600
             motivation = state.agent_motivations[i_agent, 0]
             motivation_reason = motivation < 0.48  
             if time_reason or motivation_reason:

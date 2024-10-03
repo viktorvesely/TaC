@@ -5,7 +5,7 @@ from .state import Vars
 from .main import experiment_simulation
 
 def boot_experiment(config: Vars):
-    experiment_simulation(config, desired_t_s=140)
+    experiment_simulation(config, desired_t_s=150)
 
 
 def vary(source: Vars, name: str, values: list, variations: int) -> list[Vars]:
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     import numpy as np
 
 
-    source = Vars(experiment_name="look_for_target_cooldown")
+    source = Vars(experiment_name="r_increased_look_cooldown")
     configs = vary(
         source,
         name="generation_empty_w",
