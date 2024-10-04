@@ -1,8 +1,6 @@
 # TaC
 **Thieves and Citizens**
 
-![Behavior](https://github.com/viktorvesely/TaC/blob/main/tac_flow_chart_v1.2.png?raw=True)
-
 ## Description
 
 TaC is an Agent Based Model simulation where two groups, Thieves and Citizens, interact within an environment.
