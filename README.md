@@ -23,8 +23,8 @@ You can find the required dependecies for this project in the `pyproject.toml` f
    ```
 
 2. **Install the project dependencies:**
-3. 
-4. **Compile the Cython files:**
+   
+3. **Compile the Cython files:**
    ```bash
    # Navigate to the Cython files and compile them
    cd simulation/world/c_vision
