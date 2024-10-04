@@ -12,7 +12,7 @@ TaC is an Agent Based Model simulation where two groups, Thieves and Citizens, i
 ### Common Requirements
 - **Python**: Ensure Python is installed on your system. Download it [here](https://www.python.org/downloads/).
 
-You can find the required dependecies for this project in the `pyproject.toml` file and install them using pip or your preferred package manager.
+- **Dependencies**: You can find the required dependecies for this project in the `pyproject.toml` file and install them using pip or your preferred package manager.
 
 ## Setting Up the Project
 
