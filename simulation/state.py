@@ -20,7 +20,7 @@ class Vars:
     generation_lines_w: float = 30
     generation_corners_w: float = 10
     generation_cross_w: float = 10
-    generation_empty_w: float = 1
+    generation_empty_w: float = 10
     generation_one_w: float = 12
     
     n_thieves: int = 8
@@ -28,7 +28,8 @@ class Vars:
     agent_size: float = 10
 
     n_grids: int = 24
-    
+
+
 class State:
 
     def __init__(self, bypass=False) -> None:

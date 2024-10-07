@@ -247,6 +247,24 @@ class Grid:     # 2D grid world, handles spatial positioning, wall locations, an
         np.add.at(self.density, (i, j), 1.0)
 
         self.blurry_density =  convolve2d(self.density.astype(float), self.gaussian_filter, mode="same", boundary="symm")
+        
+        # from matplotlib import pyplot as plt
+        # from pathlib import Path
+
+        # path = Path(__file__).parent.parent / "data"
+        # max_density = np.max(self.density)
+        # fig, ax = plt.subplots()
+        # mappable = ax.matshow(self.density, cmap="magma", vmax=max_density, vmin=0)
+        # fig.colorbar(mappable)
+        # fig.savefig(path / "density.pdf")
+        # plt.show()
+    
+
+        # fig, ax = plt.subplots()
+        # mappable= ax.matshow(self.blurry_density, cmap="magma", vmax=max_density, vmin=0)
+        # fig.colorbar(mappable)
+        # fig.savefig(path / "density_blurred.pdf")
+        # plt.show()
 
         self.offsets = np.cumsum(
             np.pad(self.density.flatten(), (1, 0))
