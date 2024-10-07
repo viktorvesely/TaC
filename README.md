@@ -1,56 +1,43 @@
 # TaC
 **Thieves and Citizens**
 
-![behaviour](https://github.com/viktorvesely/TaC/blob/main/tac_flow_chart_v1.2.png?raw=True)
-
 ## Description
 
-TaC is a strategic game simulation where two groups, Thieves and Citizens, interact within a  environment.
+TaC is an Agent Based Model simulation where two groups, Thieves and Citizens, interact within an environment.
 
-## Poetry Setup Instructions
+## Prerequisites
 
-This project uses [Poetry](https://python-poetry.org/) for dependency management and packaging. Below are the steps to set up the project using Poetry.
+### Common Requirements
+- **Python**: Ensure Python is installed on your system. Download it [here](https://www.python.org/downloads/).
 
-### Prerequisites
+- **Dependencies**: You can find the required dependecies for this project in the `requirements.txt` file and install them using pip or your preferred package manager.
 
-- **Python**: Make sure Python is installed. You can download it [here](https://www.python.org/downloads/).
-- **Poetry**: Install Poetry by running the following command:
-  ```bash
-  curl -sSL https://install.python-poetry.org | python3 -
-  ```
+## Setting Up the Project
 
-### Setting Up the Project
-
-1. Clone the repository:
+1. **Clone the repository:**
    ```bash
    git clone <repository-url>
    cd <repository-name>
    ```
 
-2. Install the project dependencies with Poetry:
+2. **Install the project dependencies:**
+   
+3. **Compile the Cython files:**
    ```bash
-   poetry install
+   # Navigate to the Cython files and compile them
+   cd simulation/world/c_vision
+   python compile_vision build_ext --inplace
+   
+   cd simulation/world/c_collision
+   python compile_collisions build_ext --inplace
    ```
 
-   This will automatically create a virtual environment and install all dependencies listed in the `pyproject.toml` file.
+## Running the Project
 
-3. Compile the cython files
+1. **Activate the virtual environment:**
+   (if using a virtual environment manager, activate it here)
 
-    ```bash
-   Go to simulation/world/c_vision
-      run python compile_vision build_ext --inplace
-   Go to simulation/world/c_collision
-      run python compile_collisions build_ext --inplace
-
-   ```
-### Running the Project
-
-1. Activate the virtual environment:
-   ```bash
-   poetry shell
-   ```
-
-2. Run the project:
+2. **Run the project:**
    ```bash
    python -m simulation.main
    ```
