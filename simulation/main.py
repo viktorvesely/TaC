@@ -89,7 +89,7 @@ def realtime_simulation_cycle(window: Window, camera: Camera, world: World, stat
 
     
 
-def experiment_simulation(config: Vars, desired_t_s: float):
+def experiment_simulation(config: Vars):
 
     state = State(bypass=True)
     state.vars = config
@@ -105,7 +105,7 @@ def experiment_simulation(config: Vars, desired_t_s: float):
     state.start_t = 0
     state.t = state.start_t
     state.last_tick = state.start_t
-    end_t = (desired_t_s * 1000) + state.start_t
+    end_t = state.start_t + state.vars.end_t
 
     with event_manager:
         

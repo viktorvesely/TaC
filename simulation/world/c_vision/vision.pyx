@@ -170,7 +170,7 @@ cdef void _generate_vision_field(
     int i_tot,
     int j_tot
 ) noexcept nogil:
-    cdef double step_size = grid_size / 2.0
+    cdef double step_size = grid_size / 4.0
     cdef int n_steps = <int> (vision_length / step_size) 
     cdef double fov_step = fov / (<double>(n_rays - 1))
 

@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 class Vars: 
 
     experiment_name: str = "default"
+    end_t: float = 60 * 1_000
 
     generation_lines_w: float = 30
     generation_corners_w: float = 10
@@ -23,11 +24,14 @@ class Vars:
     generation_empty_w: float = 10
     generation_one_w: float = 12
     
-    n_thieves: int = 8
+    n_thieves: int = 30
     n_citizens: int = 70
     agent_size: float = 10
 
     n_grids: int = 24
+
+    frustration_weight: float = 1.0
+    vision_weight: float = 1.0
 
 
 class State:
@@ -70,3 +74,8 @@ class State:
         self.agent_motivations: np.ndarray = None
         self.agent_heading_vec: np.ndarray = None
         self.agent_last_rob: np.ndarray = None
+        
+        self.agent_last_nav_progress: np.ndarray = None
+        self.agent_last_nav_coordinate: np.ndarray = None
+
+        self.debug_i_agent_print_action: int = -1

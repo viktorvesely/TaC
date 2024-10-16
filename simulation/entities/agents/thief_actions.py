@@ -28,16 +28,15 @@ class ThiefActions():
         target_look_period = 2_000
         next_target_look = state.t
 
-        def action(i_agent: int, state: State):
+        def navigate_action(i_agent: int, state: State):
             nonlocal next_target_look
-            # Check if the agent has reached the point of interest
 
             search_for_target = state.t >= next_target_look
 
-            if state.world.maps.execute_path(i_agent):
+            if state.world.maps.execute_path(i_agent) :
                 # If the point of interest is reached, select the next point of interest
                 return ThiefActions.select_almost_empty_area
-            elif (state.agent_motivations[i_agent] >= 0.5) and search_for_target:
+            elif (state.agent_motivations[i_agent, 0] >= 0.5) and search_for_target:
                 next_target_look = state.t + target_look_period
 
                 target = ThiefActions.look_for_target(i_agent, state)
@@ -46,9 +45,9 @@ class ThiefActions():
                     state.maps.paths[i_agent] = None
                     return ThiefActions.approach_target(i_agent, target, state)
             # Continue navigating until the point of interest is reached
-            return action
+            return navigate_action
         
-        return action
+        return navigate_action
     
     @staticmethod
     def look_for_target(i_agent: int, state: State):
@@ -103,7 +102,7 @@ class ThiefActions():
         state.agent_speed[i_agent, :] = 0.16  # Increase speed while approaching
         approach_start = state.t
 
-        def action(i_agent: int, state: State):
+        def approach_action(i_agent: int, state: State):
 
             time_reason = (state.t - approach_start) > 1_600
             motivation = state.agent_motivations[i_agent, 0]
@@ -113,7 +112,6 @@ class ThiefActions():
                 TheftAborted(state, i_agent, motivation, np.nan, reason=("time" if time_reason else "motivation"))
                 return ThiefActions.select_almost_empty_area
         
-            # TODO evaluate theft here decrease motivation if target looks at you
         
             # Calculate distance to the target
             delta = state.agent_position[i_agent, :] - state.agent_position[target_i, :]
@@ -132,9 +130,9 @@ class ThiefActions():
             if distance < (state.vars.agent_size * 3.2):
                 state.agent_speed[i_agent, :] = 0.1
                 return ThiefActions.theft(i_agent, target_i, state)
-            return action  # Keep approaching if not close enough
+            return approach_action  # Keep approaching if not close enough
         
-        return action
+        return approach_action
 
     @staticmethod
     def theft(i_agent: int, target_i: int, state: State):

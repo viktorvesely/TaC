@@ -31,6 +31,9 @@ class GoogleMaps:
         self.state = state
         self.paths: list[list[tuple[int, int]] | None] = [None for _ in range(state.agent_position.shape[0])]
 
+        state.agent_last_nav_coordinate = np.full((state.n_agents, 2), -1)
+        state.agent_last_nav_progress = np.full(state.n_agents, state.t)
+
 
     def heuristic_avoid_dense(self, source: tuple[int, int], destination: tuple[int, int]) -> float:
         return abs(source[0] - destination[0]) + abs(source[1] - destination[1]) + self.grid.density[source[0], source[1]]
@@ -42,6 +45,17 @@ class GoogleMaps:
     def execute_path(self, i_agent: int) -> bool:
 
         agent_coords = self.state.agent_coords[i_agent, :].tolist()
+        last_agent_coords = self.state.agent_last_nav_coordinate[i_agent, :].tolist()
+
+        if (agent_coords[0] == last_agent_coords[0]) and (agent_coords[1] == last_agent_coords[1]):
+            if (self.state.t - self.state.agent_last_nav_progress[i_agent]) > 3_000:
+                # Agent is stuck for some reason
+                # print(i_agent, "stuck")
+                self.paths[i_agent] = None
+                return True
+        else:
+            self.state.agent_last_nav_coordinate[i_agent, :] = agent_coords
+            self.state.agent_last_nav_progress[i_agent] = self.state.t
 
         path = self.paths[i_agent]
         if path is None:
@@ -77,6 +91,8 @@ class GoogleMaps:
         new_path = self.navigate(tuple(agent_coords), to, heuristic)
         self.paths[i_agent] = new_path
 
+        self.state.agent_last_nav_progress[i_agent] = self.state.t
+        self.state.agent_last_nav_coordinate[i_agent, :] = agent_coords
         
     def get_target_poi_index(self, i_agent: int) -> int:
         return 0

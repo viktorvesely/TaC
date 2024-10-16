@@ -83,6 +83,21 @@ class Window:
                         self.slider.show()
                     else:
                         self.slider.hide()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+
+                mouse_pos = np.array(pygame.mouse.get_pos()).astype(float)
+                world_mouse_pos = self.state.camera.screenToWorld @ mouse_pos
+
+                deltas = self.state.agent_position - world_mouse_pos[np.newaxis, :]
+                distances = np.linalg.norm(deltas, axis=1)
+                i_min_dist = np.argmin(distances)
+                min_dist = distances[i_min_dist]
+
+                if min_dist <= self.state.vars.agent_size:
+                    self.state.debug_i_agent_print_action = i_min_dist
+                else:
+                    self.state.debug_i_agent_print_action = -1
             
             self.manager.process_events(event)
 

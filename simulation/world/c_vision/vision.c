@@ -20359,15 +20359,15 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
   /* "vision.pyx":173
  *     int j_tot
  * ) noexcept nogil:
- *     cdef double step_size = grid_size / 2.0             # <<<<<<<<<<<<<<
+ *     cdef double step_size = grid_size / 4.0             # <<<<<<<<<<<<<<
  *     cdef int n_steps = <int> (vision_length / step_size)
  *     cdef double fov_step = fov / (<double>(n_rays - 1))
  */
-  __pyx_v_step_size = (__pyx_v_grid_size / 2.0);
+  __pyx_v_step_size = (__pyx_v_grid_size / 4.0);
 
   /* "vision.pyx":174
  * ) noexcept nogil:
- *     cdef double step_size = grid_size / 2.0
+ *     cdef double step_size = grid_size / 4.0
  *     cdef int n_steps = <int> (vision_length / step_size)             # <<<<<<<<<<<<<<
  *     cdef double fov_step = fov / (<double>(n_rays - 1))
  * 
@@ -20385,7 +20385,7 @@ static void __pyx_f_6vision__generate_vision_field(__Pyx_memviewslice __pyx_v_ag
   __pyx_v_n_steps = ((int)(__pyx_v_vision_length / __pyx_v_step_size));
 
   /* "vision.pyx":175
- *     cdef double step_size = grid_size / 2.0
+ *     cdef double step_size = grid_size / 4.0
  *     cdef int n_steps = <int> (vision_length / step_size)
  *     cdef double fov_step = fov / (<double>(n_rays - 1))             # <<<<<<<<<<<<<<
  * 

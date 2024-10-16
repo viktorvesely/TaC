@@ -32,6 +32,7 @@ class CitizenActions:
     @staticmethod
     def navigate(i_agent: int, state: State):
 
+        state.agent_speed[i_agent, 0] = 0.1
         if state.maps.execute_path(i_agent):
             return CitizenActions.wait_and_look(
                 i_agent,
@@ -71,6 +72,8 @@ class CitizenActions:
     
     @staticmethod
     def roaming(i_agent: int, state: State):
+        
+        state.agent_speed[i_agent, 0] = 0.1
         if state.maps.execute_path(i_agent):
             return CitizenActions.wait_and_look(i_agent, state, 5_000, np.pi / 5, CitizenActions.select_action)
         return CitizenActions.roaming
@@ -86,7 +89,7 @@ class CitizenActions:
         original_speed = state.agent_speed[i_agent, 0]
         state.agent_speed[i_agent] = 0
 
-        def action(i_agent: int, state: State):
+        def wait_action(i_agent: int, state: State):
             nonlocal next_devation
             
             if state.t >= t_finish:
@@ -97,9 +100,9 @@ class CitizenActions:
                 state.agent_angle[i_agent] = original_angle + (random.random() - 0.5) * 2 * look_deviation
                 next_devation += 800
         
-            return action  
+            return wait_action  
 
-        return action
+        return wait_action
 
 
     @staticmethod

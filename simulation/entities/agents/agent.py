@@ -77,7 +77,7 @@ class Agent(AgentInterface):
 
         max_md = factor - (factor / bias)
         min_md = -(factor / bias)
-        need_boost = 1.5
+        need_boost = 1
         max_need = abs(min_md) * need_boost
         time_max_boost = 5_000
 
@@ -91,14 +91,24 @@ class Agent(AgentInterface):
         t = np.clip(delta_last_rob, 0, time_max_boost) / time_max_boost
         from_vision = (factor *(1 - thiefs_vision_values) - (factor / bias))
         from_last_rob = ((-k) / (t -l) - (k/l)) * max_need
-        delta_motivation = (from_vision + from_last_rob) * self.state.dTick
+        delta_motivation = (
+            self.state.vars.vision_weight * from_vision +
+            self.state.vars.frustration_weight * from_last_rob
+        ) * self.state.dTick
         
         self.state.agent_motivations[~self.state.agent_is_citizen, :] += delta_motivation[:, np.newaxis]
         self.state.agent_motivations = np.clip(self.state.agent_motivations, 0.0, 1.0) 
 
-        for i, action in enumerate(self.actions):
-            next_action = action(i, self.state)
-            self.actions[i] = next_action
+        for i_agent, action in enumerate(self.actions):
+            next_action = action(i_agent, self.state)
+            self.actions[i_agent] = next_action
+
+            if i_agent == self.state.debug_i_agent_print_action:
+                print(
+                    "citizen" if self.state.agent_is_citizen[i_agent] else "thief",
+                    i_agent,
+                    action.__name__
+                )
         # 
         self.state.agent_heading_vec = np.vstack((np.cos(self.state.agent_angle), np.sin(self.state.agent_angle))).T
         self.state.agent_velocity = self.state.agent_heading_vec * self.state.agent_speed

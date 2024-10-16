@@ -12,7 +12,7 @@ from .c_vision.vision import generate_vision_field
 class Vision:
 
     # Attributes to define fov, vision lenght and number or rays
-    fov = np.pi / 3         # 60° FOV
+    fov = np.pi / 3        # 60° FOV
     vision_length = 160.0   # Max distance
     n_rays = 5
 
@@ -21,7 +21,7 @@ class Vision:
         self.grid = grid
         self.state = state
         self.values = np.zeros_like(self.grid.walls)
-        self.max_targets_per_agent: int = 5
+        self.max_targets_per_agent: int = 20
         state.agents_in_vision = np.full((state.n_agents, self.max_targets_per_agent), -1, dtype=np.int32)
 
         self.next_vision_event = state.t
