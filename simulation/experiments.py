@@ -25,7 +25,7 @@ def experiment(
         source: Vars | None = None,
         simulation_time_s: float = 150,
         sparsities: tuple[float, ...] = (1, 80),
-        variations: int = 100
+        variations: int = 30
     ):
 
     import tqdm
@@ -57,8 +57,8 @@ def test_for_different_motivation_weights(base_name: str):
     import numpy as np
     from itertools import product
 
-    vision_weights = np.linspace(0, 1, num=5, endpoint=True)
-    frustration_weights = np.linspace(0, 1, num=5, endpoint=True)
+    vision_weights = np.linspace(0, 1, num=6, endpoint=True)
+    frustration_weights = np.linspace(0, 1, num=6, endpoint=True)
     n_all = vision_weights.size * frustration_weights.size
 
     source = Vars()
@@ -72,25 +72,61 @@ def test_for_different_motivation_weights(base_name: str):
     for i, (vision_w, frustration_w) in enumerate(product(vision_weights, frustration_weights)):
         exp_name = f"{base_name}_{i}"
         modified = replace(source, frustration_weight=frustration_w, vision_weight=vision_w)
-        keep_going = experiment(exp_name, source=modified, simulation_time_s=120)
+        keep_going = experiment(exp_name, source=modified, simulation_time_s=150, variations=30)
         if not keep_going:
             break
         dfs = load_experiments_by_name(exp_name)
         theft_df = dfs[THEFT_DF]
-        p_value = t_test_h1(theft_df)
-        grid[(vision_w, frustration_w)] = p_value
+        # p_value = t_test_h1(theft_df)
+        grid[(vision_w, frustration_w)] = theft_df
 
         print(f" {(i + 1)} / {n_all}")
 
     with open(path, "wb") as f:
         pickle.dump(grid, f)
 
-    plot_2d_grid(grid, xlabel="frustration", ylabel="vision")
+    # plot_2d_grid(grid, xlabel="frustration", ylabel="vision")
         
 
-if __name__ == "__main__":
-    # test_for_different_motivation_weights("weights_120s_100v")
+def test_for_different_spot_preferences(base_name: str):
+    
+    import pickle
+    import numpy as np
 
-    experiment("test_new", variations=20)
+    source = Vars()
+    grid = dict()
+
+    thief_preferences = np.linspace(0, source.n_citizens, num=12, endpoint=True)
+    n_all = thief_preferences.size
+
+    path = Utils.experiments_path().parent / "tests" / f"{base_name}.pkl"
+    folder = path.parent
+    if not folder.is_dir():
+        folder.mkdir(parents=True)
+
+    for i, thief_preference in enumerate(thief_preferences):
+        exp_name = f"{base_name}_{i}"
+        modified = replace(source, thief_preference_spot_n_people=thief_preference)
+        keep_going = experiment(exp_name, source=modified)
+        if not keep_going:
+            break
+        dfs = load_experiments_by_name(exp_name)
+        theft_df = dfs[THEFT_DF]
+        # p_value = t_test_h1(theft_df)
+        grid[thief_preference] = theft_df
+
+        print(f" {(i + 1)} / {n_all}")
+
+    with open(path, "wb") as f:
+        pickle.dump(grid, f)
+
+    # plot_2d_grid(grid, xlabel="", ylabel="n_people")
+
+if __name__ == "__main__":
+    # test_for_different_spot_preferences("fixed_preferences_12values")
+
+    # test_for_different_motivation_weights("weights_6x6_saved_df")
+
+    experiment("rebase")
     
     

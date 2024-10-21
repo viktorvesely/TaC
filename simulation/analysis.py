@@ -1,3 +1,4 @@
+from typing import Literal
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -11,7 +12,16 @@ from matplotlib.colors import TwoSlopeNorm
 THEFT_DF = "TheftEvent.parquet"
 regex = r"(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})_(\d{5})"
 
-def plot_2d_grid(grid, xlabel: str, ylabel: str, vmax: float=None, vmin=None, cmap: str = "coolwarm"):
+def plot_2d_grid(
+        grid,
+        xlabel: str, 
+        ylabel: str,
+        vmax: float=None,
+        vmin=None,
+        cmap: str = "coolwarm",
+        mode: Literal["pvalue", "normal"] = "pvalue",
+        cbar_text: str = ""
+    ):
 
     rows = sorted(set(key[0] for key in grid.keys()))
 
@@ -20,7 +30,7 @@ def plot_2d_grid(grid, xlabel: str, ylabel: str, vmax: float=None, vmin=None, cm
         columns = sorted(set(key[1] for key in grid.keys()))
     except IndexError:
         case_1d = True
-        columns = [None]
+        columns = [0]
 
 
     matrix = np.zeros((len(rows), len(columns)))
@@ -32,23 +42,45 @@ def plot_2d_grid(grid, xlabel: str, ylabel: str, vmax: float=None, vmin=None, cm
             matrix[i, j] = metric
 
     # Plotting the matrix using subplots
-    cmap = plt.get_cmap(cmap)
-    print(np.max(matrix))
-    norm = TwoSlopeNorm(vmin=(vmin or 0.0), vcenter=0.05, vmax=(vmax or np.max(matrix)))
+    normal_plot = mode == "normal"
 
-    fig, ax = plt.subplots()
-    cax = ax.matshow(matrix, cmap=cmap, norm=norm)
-    fig.colorbar(cax)
+    used_vmin = None
+    used_vmax = None
+    if not normal_plot:
+        cmap = plt.get_cmap(cmap)
+        norm = TwoSlopeNorm(vmin=(vmin or 0.0), vcenter=0.05, vmax=(vmax or np.max(matrix)))
+    else:
+        norm = None
+        used_vmin = vmin
+        used_vmax = vmax
+
+
+
+    if case_1d:
+        fig, ax = plt.subplots(figsize=(3, 7))
+        fig.subplots_adjust(left=0, right=0.7, top=0.9, bottom=0.1)
+    else:
+        fig, ax = plt.subplots()
+    cax = ax.matshow(matrix, cmap=cmap, norm=norm, vmin=used_vmin, vmax=used_vmax)
+    cbar = fig.colorbar(cax)
+    cbar.ax.get_yaxis().labelpad = 15
+    cbar.ax.set_ylabel(cbar_text, rotation=270, fontsize=12)
 
     # Set axis labels
     ax.set_xticks(np.arange(len(columns)))
-    ax.set_xticklabels(columns)
+    ax.set_xticklabels(np.round(columns, 2))
     ax.set_yticks(np.arange(len(rows)))
-    ax.set_yticklabels(rows)
+    ax.set_yticklabels(np.round(rows, 2))
 
     ax.set_xlabel(xlabel, fontsize=12)
     ax.xaxis.set_label_position('top') 
     ax.set_ylabel(ylabel, fontsize=12)
+
+    for i in range(len(rows)):
+        for j in range(len(columns)):
+            ax.text(j, i, f'{matrix[i, j]:.3f}', va='center', ha='center', color='black')
+
+    
 
     plt.show()
 
@@ -95,9 +127,14 @@ def load_experiments_by_name(
             
             dfs[dfname].append(df)
     
-    dfs = {dfname: pd.concat(inners, ignore_index=True) for dfname, inners in dfs.items()}
+    new_dfs = dict()
+    for dfname, inners in dfs.items():
+        if len(inners) == 0:
+            new_dfs[dfname] = pd.DataFrame()
+        else:
+            new_dfs[dfname] = pd.concat(inners, ignore_index=True)
 
-    return dfs
+    return new_dfs
 
 
 def take_any(s: pd.Series):
@@ -110,7 +147,7 @@ def take_any(s: pd.Series):
 def succ_normalized_thefts(theft_df: pd.DataFrame) -> pd.DataFrame:
     
     n_thieves = take_any(theft_df["n_thieves"])
-    end_t = take_any(theft_df["end_t"])
+    end_t = take_any(theft_df["end_t"]) / (1_000 * 60) 
 
     conditions = theft_df.groupby(["rand", "generation_empty_w"])["caught"].value_counts()
     conditions = conditions.reset_index()
@@ -120,32 +157,43 @@ def succ_normalized_thefts(theft_df: pd.DataFrame) -> pd.DataFrame:
     return conditions
 
 
-def t_test_h1(theft_df: pd.DataFrame) -> float:
+def get_condition_samples(count_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
-    experiments_condition = succ_normalized_thefts(theft_df)
-    
-    densities = np.sort(experiments_condition["generation_empty_w"].unique())
+    densities = np.sort(count_df["generation_empty_w"].unique())
     assert densities.size == 2
     value_high_sparsity = densities[-1]
     value_low_sparsity = densities[0]
     
-    sample_high_sparsity = experiments_condition.loc[experiments_condition["generation_empty_w"] == value_high_sparsity, "count"]
-    sample_low_sparsity = experiments_condition.loc[experiments_condition["generation_empty_w"] == value_low_sparsity, "count"]
-    results = ttest_ind(sample_low_sparsity, sample_high_sparsity, equal_var=False, alternative="greater")
+    sample_high_sparsity = count_df.loc[count_df["generation_empty_w"] == value_high_sparsity, "count"]
+    sample_low_sparsity = count_df.loc[count_df["generation_empty_w"] == value_low_sparsity, "count"]
 
+    return sample_low_sparsity, sample_high_sparsity
+
+def t_test_h1(theft_df: pd.DataFrame) -> float:
+
+    if theft_df.empty:
+        return 1.0
+
+    experiments_condition = succ_normalized_thefts(theft_df)
+
+    if experiments_condition.empty:
+        return 1.0
+    
+    sample_low_sparsity, sample_high_sparsity = get_condition_samples(experiments_condition)
+    results = ttest_ind(sample_low_sparsity, sample_high_sparsity, equal_var=False, alternative="greater")
     return results.pvalue
 
 def mannwhitneyu_test_h1(theft_df: pd.DataFrame) -> float:
 
+    if theft_df.empty:
+        return 1.0
+
     experiments_condition = succ_normalized_thefts(theft_df)
+
+    if experiments_condition.empty:
+        return 1.0
     
-    densities = np.sort(experiments_condition["generation_empty_w"].unique())
-    assert densities.size == 2
-    value_high_sparsity = densities[-1]
-    value_low_sparsity = densities[0]
-    
-    sample_high_sparsity = experiments_condition.loc[experiments_condition["generation_empty_w"] == value_high_sparsity, "count"]
-    sample_low_sparsity = experiments_condition.loc[experiments_condition["generation_empty_w"] == value_low_sparsity, "count"]
+    sample_low_sparsity, sample_high_sparsity = get_condition_samples(experiments_condition)
     results = mannwhitneyu(sample_low_sparsity, sample_high_sparsity, alternative="greater")
 
     return results.pvalue

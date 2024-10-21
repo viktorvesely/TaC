@@ -24,14 +24,16 @@ class Vars:
     generation_empty_w: float = 10
     generation_one_w: float = 12
     
-    n_thieves: int = 30
-    n_citizens: int = 70
+    n_thieves: int = 10
+    n_citizens: int = 100
     agent_size: float = 10
 
     n_grids: int = 24
 
     frustration_weight: float = 1.0
     vision_weight: float = 1.0
+
+    thief_preference_spot_n_people: float = 2
 
 
 class State:

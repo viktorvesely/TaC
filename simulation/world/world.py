@@ -56,8 +56,6 @@ class World(WorldInterface):             # Concrete implementation of WorldInter
         self.pois.draw(surface)
         self.vision.draw(surface)
 
-        self.window.manager.draw_ui(surface)
-
         pygame.display.flip()
 
     def tick(self):

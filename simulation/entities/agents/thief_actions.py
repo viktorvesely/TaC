@@ -12,7 +12,7 @@ class ThiefActions():
     def select_almost_empty_area(i_agent: int, state: State):
 
         walkable_density = state.grid.blurry_density[state.grid.walkable_mask].flatten().astype(float)
-        weights = 12 * np.exp(-np.power(walkable_density - 1.69, 2) / 2) + 0.1
+        weights = 12 * np.exp(-np.power(walkable_density - state.vars.thief_preference_spot_n_people, 2) / 2) + 0.1
         weights = weights / weights.sum()
         walkable_inds = state.grid.grid_indicies[state.grid.walkable_mask].flatten()
 
@@ -146,7 +146,7 @@ class ThiefActions():
         from_target_to_thief = from_target_to_thief / np.linalg.norm(from_target_to_thief)
         approach_cos_angle = np.dot(from_target_to_thief, state.agent_heading_vec[target_i])
         p_caught_by_target = approach_cos_angle / 2 + 0.5
-        p_caught_by_target = max(p_caught_by_target - 0.4, 0.0)
+        p_caught_by_target = max(p_caught_by_target, 0.0)
 
         thief_coords = state.agent_coords[i_agent, :]
         vision_value = state.world.vision.values[thief_coords[0], thief_coords[1]]

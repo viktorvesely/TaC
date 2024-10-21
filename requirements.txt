@@ -5,7 +5,6 @@ setuptools==75.1.0
 pandas==2.2.3
 pyarrow==17.0.0
 fastparquet==2024.5.0
-pygame-gui==0.6.12
 ipykernel==6.29.5
 jupyter==1.1.1
 matplotlib==3.9.2
