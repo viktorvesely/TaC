@@ -21,10 +21,22 @@ TaC is an Agent Based Model simulation where two groups, Thieves and Citizens, i
    ```
 
 2. **Install the project dependencies:**
+
+   You can install the project dependencies using either `pip` or `poetry`.
+
+   **Using pip:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   **Using poetry:**
+   ```bash
+   poetry install
+   ```
    
 3. **Compile the Cython files:**
    ```bash
-   # Navigate to the Cython files and compile them
+   # Navigate to the Cython files and compile them, note C compiler is required
    cd simulation/world/c_vision
    python compile_vision build_ext --inplace
    
